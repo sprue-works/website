@@ -1,0 +1,24 @@
+{
+  "$schema": "https://unpkg.com/wrangler/config-schema.json",
+  "name": "sprue-works-website",
+  "compatibility_date": "2026-09-02",
+
+  // Assets-only Worker: no script, everything under public/ is served as-is.
+  // _redirects (www -> apex) lives in public/ and is honoured natively.
+  "assets": {
+    "directory": "./public",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "none"
+  },
+
+  // Custom domains. Deploying creates the DNS records and certificates.
+  "routes": [
+    { "pattern": "sprue.works", "custom_domain": true },
+    { "pattern": "www.sprue.works", "custom_domain": true }
+  ],
+
+  // Branch previews: Workers Builds uploads a version per non-production
+  // branch and aliases it by branch name at <alias>-sprue-works-website.<subdomain>.workers.dev.
+  "workers_dev": true,
+  "preview_urls": true
+}
