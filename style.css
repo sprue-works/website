@@ -1,0 +1,110 @@
+/* ---- Typeface ------------------------------------------------------------
+   The wordmark font. Change this block together with the Google Fonts <link>
+   in index.html; nothing else on the page depends on it. */
+:root {
+  --wordmark-font: "Outfit", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --wordmark-weight: 500;
+}
+
+/* ---- Palette (coolors.co/palette/c2571b-f97316-134e4a-f9dc5c-fff7ed-7fc6a4-904114-251818) */
+:root {
+  --coffee-bean: #251818;
+  --floral-white: #fff7ed;
+  --pumpkin: #f97316;
+  --rust: #c2571b;
+  --brown: #904114;
+  --dark-teal: #134e4a;
+  --mint: #7fc6a4;
+  --yellow: #f9dc5c;
+
+  --bg: var(--coffee-bean);
+  --fg: var(--floral-white);
+  --accent: var(--pumpkin);
+  --muted: color-mix(in srgb, var(--floral-white) 55%, var(--coffee-bean));
+
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+main {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: 2rem 1rem;
+}
+
+/* ---- Wordmark ---- */
+.wordmark {
+  margin: 0;
+  font-family: var(--wordmark-font);
+  font-weight: var(--wordmark-weight);
+  /* ~9vw between 2.75rem and 8rem so it stays large on phones and desktops. */
+  font-size: clamp(2.75rem, 9vw, 8rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.wordmark__sprue {
+  color: var(--fg);
+}
+
+.wordmark__works {
+  color: var(--accent);
+}
+
+/* Sizing for the eventual SVG mark (see the comment in index.html). */
+.wordmark__mark {
+  display: block;
+  width: clamp(16rem, 60vw, 48rem);
+  max-width: 100%;
+  height: auto;
+}
+
+/* ---- Footer ---- */
+footer {
+  padding: 1.5rem 1rem 2rem;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+footer a {
+  color: var(--muted);
+  text-decoration: none;
+  text-underline-offset: 0.2em;
+}
+
+footer a:hover,
+footer a:focus-visible {
+  color: var(--fg);
+  text-decoration: underline;
+}
+
+footer a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
