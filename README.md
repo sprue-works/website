@@ -25,15 +25,27 @@ The site is hosted on **Cloudflare Pages**, connected to this GitHub repo.
 
 ### Cloudflare setup (one-time)
 
-1. Cloudflare dashboard → Workers & Pages → Create → Pages → Connect to Git →
-   `sprue-works/website`. Name the project `sprue-works-website` (or pass
-   `-var pages_hostname=<name>.pages.dev` in step 4). Production branch `main`,
-   no framework preset, build command empty, output directory `/`.
-2. Settings → Builds & deployments → Preview branches: **All non-production
-   branches**.
-3. Custom domains → add `sprue.works` and `www.sprue.works`.
-4. DNS: apply `terraform/` (needs `CLOUDFLARE_API_TOKEN` and the zone ID), or
-   create the two proxied `CNAME` records to `<project>.pages.dev` by hand.
+Everything except the GitHub App install is in `terraform/`.
+
+1. Install the Cloudflare Pages GitHub App on the `sprue-works` org: Cloudflare
+   dashboard → Workers & Pages → Create → Pages → Connect to Git → authorise
+   GitHub and grant access to `sprue-works/website`. Stop there; do not create
+   the project by hand.
+2. Apply the Terraform. It creates the Pages project (production branch `main`,
+   no build command, previews for all non-production branches), adds the
+   `sprue.works` and `www.sprue.works` custom domains, and creates the two
+   proxied CNAME records in the zone:
+
+   ```sh
+   export CLOUDFLARE_API_TOKEN=...   # Pages:Edit + DNS:Edit on the sprue.works zone
+   export TF_VAR_account_id=...
+   export TF_VAR_zone_id=...
+   cd terraform && terraform init && terraform apply
+   ```
+
+   Commit the `.terraform.lock.hcl` that `init` writes.
+3. The first production deploy happens on the next push to `main`; open
+   deployments in the dashboard or push an empty commit to trigger one.
 
 ## Wordmark and typeface
 
