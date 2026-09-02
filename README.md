@@ -1,57 +1,60 @@
 # sprue.works website
 
 Source for https://sprue.works: a single static page, plain HTML and CSS, no
-build step.
+build step. The site lives in `public/`.
 
 ## Run locally
 
-Open `index.html` in a browser. For a proper origin (so the Google Fonts
-`preconnect` hints behave), serve the directory instead:
+Open `public/index.html` in a browser, or serve it the way production does
+(this also exercises `_redirects`):
 
 ```sh
-python3 -m http.server 8000
+npx wrangler dev
 ```
 
 ## Deploy
 
-The site is hosted on **Cloudflare Pages**, connected to this GitHub repo.
+The site is a **Cloudflare Worker with static assets** (assets only, no
+script), configured in `wrangler.jsonc` and deployed by **Workers Builds** from
+this GitHub repo.
 
-- **Production:** every push to `main` deploys to https://sprue.works.
-- **Previews:** every other branch (including PR branches) gets its own
-  `https://<branch>.<project>.pages.dev` URL, with `/` in the branch name
-  replaced by `-`.
-- **Build settings:** none. No build command, output directory `/`.
-- **Redirects:** `_redirects` sends `www.sprue.works` to the apex.
+- **Production:** every push to `main` runs `npx wrangler deploy` and serves
+  https://sprue.works. `www.sprue.works` redirects to the apex via
+  `public/_redirects`.
+- **Previews:** every other branch runs `npx wrangler versions upload`, which
+  publishes a preview version aliased by branch name at
+  `https://<alias>-sprue-works-website.<account-subdomain>.workers.dev`, where
+  `<alias>` is the branch name lowercased with `/` replaced by `-`. PRs get the
+  URL as a comment.
+- **Custom domains and DNS:** declared as `custom_domain` routes in
+  `wrangler.jsonc`; the first deploy creates the DNS records and certificates in
+  the existing zone, so nothing is managed by hand or in Terraform.
+- **Build settings:** no build command. Deploy commands are the Workers Builds
+  defaults.
 
 ### Cloudflare setup (one-time)
 
-Everything except the GitHub App install is in `terraform/`.
+1. Cloudflare dashboard → Workers & Pages → Create → **Continue with GitHub** →
+   authorise the Cloudflare GitHub App for the `sprue-works` org if prompted,
+   then select `sprue-works/website`.
+2. Project name `sprue-works-website` (must match `name` in `wrangler.jsonc`),
+   production branch `main`, no build command, deploy command left at the
+   default. Create and deploy.
+3. In the Worker: Settings → Build → enable **non-production branch builds**
+   and **pull request comments**. Settings → Domains & Routes should already
+   show `sprue.works`, `www.sprue.works`, the `workers.dev` route, and preview
+   URLs enabled, all from `wrangler.jsonc`.
 
-1. Install the Cloudflare Pages GitHub App on the `sprue-works` org: Cloudflare
-   dashboard → Workers & Pages → Create → Pages → Connect to Git → authorise
-   GitHub and grant access to `sprue-works/website`. Stop there; do not create
-   the project by hand.
-2. Apply the Terraform. It creates the Pages project (production branch `main`,
-   no build command, previews for all non-production branches), adds the
-   `sprue.works` and `www.sprue.works` custom domains, and creates the two
-   proxied CNAME records in the zone:
-
-   ```sh
-   export CLOUDFLARE_API_TOKEN=...   # Pages:Edit + DNS:Edit on the sprue.works zone
-   export TF_VAR_account_id=...
-   export TF_VAR_zone_id=...
-   cd terraform && terraform init && terraform apply
-   ```
-
-   Commit the `.terraform.lock.hcl` that `init` writes.
-3. The first production deploy happens on the next push to `main`; open
-   deployments in the dashboard or push an empty commit to trigger one.
+You can also deploy from a laptop with `npx wrangler login && npx wrangler
+deploy`; Workers Builds is what keeps `main` and the branch previews in sync.
 
 ## Wordmark and typeface
 
 The wordmark is plain text until the logo (#1) lands. `sprue` and `.works` are
 separate spans so they can be styled independently; swapping in the SVG is a
-one-line change described in the comment above the `<h1>` in `index.html`.
+one-line change described in the comment above the `<h1>` in
+`public/index.html`.
 
 The typeface is set in one place: the `--wordmark-font` block at the top of
-`style.css`, together with the Google Fonts `<link>` in `index.html`.
+`public/style.css`, together with the Google Fonts `<link>` in
+`public/index.html`.
