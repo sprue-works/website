@@ -39,7 +39,7 @@ resource "cloudflare_dns_record" "apex" {
 
 resource "cloudflare_dns_record" "www" {
   zone_id = var.zone_id
-  name    = "www"
+  name    = "www.sprue.works"
   type    = "CNAME"
   content = var.pages_hostname
   proxied = true

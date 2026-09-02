@@ -26,8 +26,9 @@ The site is hosted on **Cloudflare Pages**, connected to this GitHub repo.
 ### Cloudflare setup (one-time)
 
 1. Cloudflare dashboard → Workers & Pages → Create → Pages → Connect to Git →
-   `sprue-works/website`. Production branch `main`, no framework preset, build
-   command empty, output directory `/`.
+   `sprue-works/website`. Name the project `sprue-works-website` (or pass
+   `-var pages_hostname=<name>.pages.dev` in step 4). Production branch `main`,
+   no framework preset, build command empty, output directory `/`.
 2. Settings → Builds & deployments → Preview branches: **All non-production
    branches**.
 3. Custom domains → add `sprue.works` and `www.sprue.works`.
