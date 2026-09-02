@@ -27,11 +27,13 @@ this GitHub repo.
 - **Custom domains and DNS:** declared as `custom_domain` routes in
   `wrangler.jsonc`; the first deploy creates the DNS records and certificates in
   the existing zone.
-- **www redirect:** a zone-level Redirect Rule ("www to apex", in the
-  sprue.works zone under Rules) sends `www.sprue.works/*` to
-  `https://sprue.works/*` with a 301. It is not in the repo: Workers
-  static-asset `_redirects` files accept only relative source paths, so a
-  host-based redirect has to live at the zone.
+- **www redirect:** a zone-level Redirect Rule ("www to apex") sends
+  `www.sprue.works/*` to `https://sprue.works/*` with a 301. It is declared
+  in `terraform/` (Workers static-asset `_redirects` files accept only
+  relative source paths, so a host-based redirect has to live at the zone).
+  Apply with `CLOUDFLARE_API_TOKEN` set; the header comment in
+  `terraform/main.tf` has the one-time `terraform import` for the ruleset
+  that already exists.
 - **Build settings:** no build command. Deploy commands are the Workers Builds
   defaults.
 
