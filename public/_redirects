@@ -1,2 +1,3 @@
-# www -> apex (Cloudflare Pages redirects file)
+# www -> apex. Cloudflare static-asset redirects file; honoured by Workers with
+# assets and by Pages when placed in the assets directory.
 https://www.sprue.works/* https://sprue.works/:splat 301
