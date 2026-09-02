@@ -20,8 +20,11 @@
   --bg: var(--coffee-bean);
   --fg: var(--floral-white);
   --accent: var(--pumpkin);
+  --muted: #9d938d; /* fallback for browsers without color-mix() */
   --muted: color-mix(in srgb, var(--floral-white) 55%, var(--coffee-bean));
 
+  /* The palette is intentionally a single dark scheme (coffee-bean background)
+     regardless of the OS preference; color-scheme keeps UA chrome consistent. */
   color-scheme: dark;
 }
 
@@ -94,6 +97,7 @@ footer {
 footer a {
   color: var(--muted);
   text-decoration: underline;
+  text-decoration-color: rgb(157 147 141 / 0.5);
   text-decoration-color: color-mix(in srgb, var(--muted) 50%, transparent);
   text-decoration-thickness: 1px;
   text-underline-offset: 0.2em;
