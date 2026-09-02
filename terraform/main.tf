@@ -24,6 +24,10 @@ terraform {
 
 provider "cloudflare" {}
 
+locals {
+  production_branch = "main"
+}
+
 variable "account_id" {
   description = "Cloudflare account ID"
   type        = string
@@ -45,7 +49,7 @@ variable "project_name" {
 resource "cloudflare_pages_project" "site" {
   account_id        = var.account_id
   name              = var.project_name
-  production_branch = "main"
+  production_branch = local.production_branch
 
   # Static site: no build step, serve the repo root.
   build_config = {
@@ -59,7 +63,7 @@ resource "cloudflare_pages_project" "site" {
     config = {
       owner                          = "sprue-works"
       repo_name                      = "website"
-      production_branch              = "main"
+      production_branch              = local.production_branch
       production_deployments_enabled = true
       pr_comments_enabled            = true
       # Build a preview for every non-production branch.

@@ -97,7 +97,7 @@ footer {
 footer a {
   color: var(--muted);
   text-decoration: underline;
-  text-decoration-color: rgb(157 147 141 / 0.5);
+  text-decoration-color: rgba(157, 147, 141, 0.5);
   text-decoration-color: color-mix(in srgb, var(--muted) 50%, transparent);
   text-decoration-thickness: 1px;
   text-underline-offset: 0.2em;
