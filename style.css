@@ -93,14 +93,16 @@ footer {
 
 footer a {
   color: var(--muted);
-  text-decoration: none;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--muted) 50%, transparent);
+  text-decoration-thickness: 1px;
   text-underline-offset: 0.2em;
 }
 
 footer a:hover,
 footer a:focus-visible {
   color: var(--fg);
-  text-decoration: underline;
+  text-decoration-color: currentColor;
 }
 
 footer a:focus-visible {
