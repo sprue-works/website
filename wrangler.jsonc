@@ -1,10 +1,11 @@
 {
   "$schema": "https://unpkg.com/wrangler/config-schema.json",
-  "name": "sprue-works-website",
+  "name": "website",
   "compatibility_date": "2026-09-02",
 
   // Assets-only Worker: no script, everything under public/ is served as-is.
-  // _redirects (www -> apex) lives in public/ and is honoured natively.
+  // The www -> apex redirect is a zone Redirect Rule (see README), because
+  // Workers static-asset _redirects files only accept relative source paths.
   "assets": {
     "directory": "./public",
     "html_handling": "auto-trailing-slash",
@@ -18,7 +19,7 @@
   ],
 
   // Branch previews: Workers Builds uploads a version per non-production
-  // branch and aliases it by branch name at <alias>-sprue-works-website.<subdomain>.workers.dev.
+  // branch and aliases it by branch name at <alias>-website.igneus-fdc.workers.dev.
   "workers_dev": true,
   "preview_urls": true
 }
