@@ -5,8 +5,7 @@ build step. The site lives in `public/`.
 
 ## Run locally
 
-Open `public/index.html` in a browser, or serve it the way production does
-(this also exercises `_redirects`):
+Open `public/index.html` in a browser, or serve it the way production does:
 
 ```sh
 npx wrangler dev
@@ -19,16 +18,20 @@ script), configured in `wrangler.jsonc` and deployed by **Workers Builds** from
 this GitHub repo.
 
 - **Production:** every push to `main` runs `npx wrangler deploy` and serves
-  https://sprue.works. `www.sprue.works` redirects to the apex via
-  `public/_redirects`.
+  https://sprue.works.
 - **Previews:** every other branch runs `npx wrangler versions upload`, which
   publishes a preview version aliased by branch name at
-  `https://<alias>-sprue-works-website.<account-subdomain>.workers.dev`, where
+  `https://<alias>-website.igneus-fdc.workers.dev`, where
   `<alias>` is the branch name lowercased with `/` replaced by `-`. PRs get the
   URL as a comment.
 - **Custom domains and DNS:** declared as `custom_domain` routes in
   `wrangler.jsonc`; the first deploy creates the DNS records and certificates in
-  the existing zone, so nothing is managed by hand or in Terraform.
+  the existing zone.
+- **www redirect:** a zone-level Redirect Rule ("www to apex", in the
+  sprue.works zone under Rules) sends `www.sprue.works/*` to
+  `https://sprue.works/*` with a 301. It is not in the repo: Workers
+  static-asset `_redirects` files accept only relative source paths, so a
+  host-based redirect has to live at the zone.
 - **Build settings:** no build command. Deploy commands are the Workers Builds
   defaults.
 
@@ -37,7 +40,7 @@ this GitHub repo.
 1. Cloudflare dashboard → Workers & Pages → Create → **Continue with GitHub** →
    authorise the Cloudflare GitHub App for the `sprue-works` org if prompted,
    then select `sprue-works/website`.
-2. Project name `sprue-works-website` (must match `name` in `wrangler.jsonc`),
+2. Worker name `website` (must match `name` in `wrangler.jsonc`),
    production branch `main`, no build command, deploy command left at the
    default. Create and deploy.
 3. In the Worker: Settings → Build → enable **non-production branch builds**
