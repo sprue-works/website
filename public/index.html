@@ -5,14 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>sprue.works</title>
     <meta name="description" content="sprue.works" />
-    <meta name="color-scheme" content="dark" />
-    <meta name="theme-color" content="#251818" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#fff7ed" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#251818" />
 
-    <!-- Typeface: keep this link and the --wordmark-font block at the top of style.css in sync. -->
+    <!-- Typefaces: keep this link and the "Typefaces" block at the top of style.css in sync. -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@500&amp;display=swap"
+      href="https://fonts.googleapis.com/css2?family=Quicksand:wght@700&amp;family=IBM+Plex+Mono:wght@300&amp;family=Nunito:wght@300&amp;display=swap"
       rel="stylesheet"
     />
 
@@ -21,13 +22,12 @@
   <body>
     <main>
       <!--
-        Wordmark. Until the logo (#1) lands, this is plain text.
-        To swap in the SVG, replace the two <span>s below with one line:
+        Wordmark. Until the logo (#1) lands, this is plain text in three parts
+        so each can be styled on its own. To swap in the SVG, replace the three
+        <span>s below with one line:
           <img class="wordmark__mark" src="logo.svg" alt="sprue.works" />
       -->
-      <h1 class="wordmark">
-        <span class="wordmark__sprue">sprue</span><span class="wordmark__works">.works</span>
-      </h1>
+      <h1 class="wordmark"><span class="wordmark__sprue">sprue</span><span class="wordmark__dot">.</span><span class="wordmark__works">works</span></h1>
     </main>
 
     <footer>

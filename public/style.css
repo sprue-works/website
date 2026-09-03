@@ -1,31 +1,58 @@
-/* ---- Typeface ------------------------------------------------------------
-   The wordmark font. Change this block together with the Google Fonts <link>
-   in index.html; nothing else on the page depends on it. */
+/* ---- Typefaces -----------------------------------------------------------
+   Chosen with the picker on the typeface/picker branch (2026-09-03). Change
+   this block together with the Google Fonts <link> in index.html; nothing
+   else on the page depends on it.
+     sprue  Quicksand 700
+     .      Nunito 300, pulled 0.035em closer to "works"
+     works  IBM Plex Mono 300, scaled 1.0368x so its x-height matches
+            Quicksand's, and tracked -0.0939em so the word is as wide as "sprue" */
 :root {
-  --wordmark-font: "Outfit", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --wordmark-weight: 500;
+  --font-sprue: "Quicksand", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --weight-sprue: 700;
+  --font-dot: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --weight-dot: 300;
+  --dot-gap-after: -0.035em;
+  --font-works: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --weight-works: 300;
+  --works-scale: 1.0368;
+  --works-tracking: -0.0939em;
 }
 
 /* ---- Palette (coolors.co/palette/c2571b-f97316-134e4a-f9dc5c-fff7ed-7fc6a4-904114-251818) */
 :root {
-  --coffee-bean: #251818;
+  --bronze-spice: #c2571b;
+  --pumpkin-spice: #f97316;
+  --pine-teal: #134e4a;
+  --royal-gold: #f9dc5c;
   --floral-white: #fff7ed;
-  --pumpkin: #f97316;
-  --rust: #c2571b;
-  --brown: #904114;
-  --dark-teal: #134e4a;
-  --mint: #7fc6a4;
-  --yellow: #f9dc5c;
+  --muted-teal: #7fc6a4;
+  --rust-brown: #904114;
+  --coffee-bean: #251818;
 
-  --bg: var(--coffee-bean);
-  --fg: var(--floral-white);
-  --accent: var(--pumpkin);
-  --muted: #9d938d; /* fallback for browsers without color-mix() */
-  --muted: color-mix(in srgb, var(--floral-white) 55%, var(--coffee-bean));
+  /* Light scheme (default) */
+  --bg: var(--floral-white);
+  --color-sprue: var(--coffee-bean);
+  --color-dot: var(--pine-teal);
+  --color-works: var(--rust-brown);
+  --fg: var(--coffee-bean);
+  --muted: #7d6e69; /* fallback for browsers without color-mix() */
+  --muted: color-mix(in srgb, var(--coffee-bean) 60%, var(--floral-white));
+  --accent: var(--rust-brown);
+  color-scheme: light;
+}
 
-  /* The palette is intentionally a single dark scheme (coffee-bean background)
-     regardless of the OS preference; color-scheme keeps UA chrome consistent. */
-  color-scheme: dark;
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: var(--coffee-bean);
+    --color-sprue: var(--floral-white);
+    --color-dot: var(--muted-teal);
+    --color-works: var(--pumpkin-spice);
+    --fg: var(--floral-white);
+    --muted: #9d938d;
+    --muted: color-mix(in srgb, var(--floral-white) 55%, var(--coffee-bean));
+    --accent: var(--pumpkin-spice);
+    color-scheme: dark;
+  }
 }
 
 *,
@@ -61,22 +88,33 @@ main {
 /* ---- Wordmark ---- */
 .wordmark {
   margin: 0;
-  font-family: var(--wordmark-font);
-  font-weight: var(--wordmark-weight);
   /* ~9vw between 2.75rem and 8rem so it stays large on phones and desktops. */
   font-size: clamp(2.75rem, 9vw, 8rem);
   line-height: 1;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
   text-align: center;
   white-space: nowrap;
 }
 
 .wordmark__sprue {
-  color: var(--fg);
+  color: var(--color-sprue);
+  font-family: var(--font-sprue);
+  font-weight: var(--weight-sprue);
+}
+
+.wordmark__dot {
+  color: var(--color-dot);
+  font-family: var(--font-dot);
+  font-weight: var(--weight-dot);
+  margin-right: var(--dot-gap-after);
 }
 
 .wordmark__works {
-  color: var(--accent);
+  color: var(--color-works);
+  font-family: var(--font-works);
+  font-weight: var(--weight-works);
+  font-size: calc(1em * var(--works-scale));
+  letter-spacing: var(--works-tracking);
 }
 
 /* Sizing for the eventual SVG mark (see the comment in index.html). */
@@ -97,7 +135,7 @@ footer {
 footer a {
   color: var(--muted);
   text-decoration: underline;
-  text-decoration-color: rgba(157, 147, 141, 0.5);
+  text-decoration-color: rgba(125, 110, 105, 0.5);
   text-decoration-color: color-mix(in srgb, var(--muted) 50%, transparent);
   text-decoration-thickness: 1px;
   text-underline-offset: 0.2em;
