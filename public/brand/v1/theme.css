@@ -1,10 +1,12 @@
 /* sprue.works brand theme, v1
    https://sprue.works/brand/v1/theme.css
 
-   Design tokens only: CSS custom properties on :root, nothing that styles an
-   element. Every token is prefixed --sw- so it cannot collide with a consumer's
-   own variables. Usage, the variable list, and the versioning rule live in
-   brand/README.md in the sprue-works/website repository.
+   Design tokens: CSS custom properties on :root, plus the two things they need
+   to work, a Google Fonts @import for the typefaces and color-scheme on :root
+   so form controls follow the palette. No element is styled. Every token is
+   prefixed --sw- so it cannot collide with a consumer's own variables. Usage,
+   the variable list, and the versioning rule live in brand/README.md in the
+   sprue-works/website repository.
 
    Versioning: additive changes (new tokens, adjusted values) land in v1; a
    rename or removal ships as /brand/v2/theme.css. This file is served with a
