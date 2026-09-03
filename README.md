@@ -1,7 +1,8 @@
 # sprue.works website
 
 Source for https://sprue.works: a single static page, plain HTML and CSS, no
-build step. The site lives in `public/`.
+build step. The site lives in `public/`, which also serves the hosted brand
+theme (`public/brand/`, documented in `brand/README.md`).
 
 ## Run locally
 
@@ -63,9 +64,12 @@ one-line change described in the comment above the `<h1>` in
 Typefaces and colours were chosen with the interactive picker, which now lives
 at `public/picker/index.html`, served unlinked and `noindex`ed at
 https://sprue.works/picker (a tool, not a page of the site; it loads extra
-Google Fonts families from the same host the home page already uses). They are
-set in one place: the "Typefaces" block at the
-top of `public/style.css`, together with the Google Fonts `<link>` in
-`public/index.html`. The page follows the OS colour scheme: Floral White
+Google Fonts families from the same host the theme already uses). They are
+defined once, as `--sw-*` custom properties in the hosted brand theme
+`public/brand/v1/theme.css` (served at https://sprue.works/brand/v1/theme.css
+with a long immutable cache via `public/_headers`); `public/style.css` only
+composes those variables. Other sprue.works properties link the same file; see
+`brand/README.md` for the consumer snippet, the variable list, and the
+versioning rule. The page follows the OS colour scheme: Floral White
 background with Coffee Bean / Pine Teal / Rust Brown text in light mode, Coffee
 Bean background with Floral White / Muted Teal / Pumpkin Spice in dark mode.
