@@ -60,7 +60,7 @@ dot, `works`) so each can be styled on its own; swapping in the SVG is a
 one-line change described in the comment above the `<h1>` in
 `public/index.html`.
 
-Typefaces and colours were chosen with the interactive picker, which lives on
+Typefaces and colours were chosen with the interactive picker, which now lives
 at `public/picker/index.html`, served unlinked and `noindex`ed at
 https://sprue.works/picker (a tool, not a page of the site; it loads extra
 Google Fonts families from the same host the home page already uses). They are
