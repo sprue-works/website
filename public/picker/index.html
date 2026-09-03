@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>sprue.works typeface picker</title>
+    <meta name="robots" content="noindex" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link id="gf" rel="stylesheet" href="" />
+    <link rel="stylesheet" href="/style.css" />
+    <style>
+      /* Picker-only additions; the page above the strip is the real home.
+         These rules come after /style.css and set the same properties, so
+         they replace the baked wordmark styles (fonts, colours, scale,
+         tracking, dot gap) with the picker's --f-*, --w-*, --c-*, --xscale
+         and gap variables. Each span's letter-spacing is applied via a CSS
+         variable; trailing tracking is measured out of widths. */
+      .wordmark__sprue { color: var(--c-sprue); font-family: var(--f-sprue); font-weight: var(--w-sprue); font-variation-settings: var(--fvs-sprue, normal); letter-spacing: var(--ls-sprue, 0em); }
+      .wordmark__dot   { font-family: var(--f-dot);   font-weight: var(--w-dot);   font-variation-settings: var(--fvs-dot, normal);   font-size: calc(1em * var(--dscale, 1)); color: var(--c-dot); margin-left: var(--dot-before, 0em); margin-right: var(--dot-after, 0em); letter-spacing: 0; }
+      .wordmark__works { color: var(--c-works); font-family: var(--f-works); font-weight: var(--w-works); font-variation-settings: var(--fvs-works, normal); font-size: calc(1em * var(--xscale, 1)); letter-spacing: calc(var(--ls-works, 0em) + var(--pitch-ls, 0em) + var(--width-ls, 0em)); }
+      main { padding-bottom: 16rem; }
+      footer { display: none; }
+      #picker {
+        /* The panel is always dark, whatever the OS scheme or the chosen
+           background, so pin its own fg/accent/muted rather than inheriting
+           the light-scheme values from /style.css. */
+        --fg: var(--floral-white);
+        --accent: var(--pumpkin-spice);
+        --muted: #9d938d;
+        --muted: color-mix(in srgb, var(--floral-white) 55%, var(--coffee-bean));
+        color-scheme: dark;
+        position: fixed; inset: auto 0 0 0; z-index: 10;
+        background: color-mix(in srgb, var(--coffee-bean) 88%, black);
+        border-top: 1px solid rgba(255, 247, 237, 0.12);
+        color: var(--fg); font: 13px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+        padding: 0.75rem 1rem 1rem; display: grid; gap: 0.6rem 1.25rem;
+        grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+      }
+      #picker fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 0.35rem; align-content: start; }
+      #picker legend { font-weight: 600; color: var(--accent); padding: 0; margin-bottom: 0.2rem; }
+      #picker label { display: grid; grid-template-columns: 6.5rem 1fr 3.5rem; gap: 0.5rem; align-items: center; }
+      #picker label[hidden] { display: none; }
+      #picker select, #picker input[type=range] { width: 100%; accent-color: var(--accent); }
+      #picker input[type=checkbox] { justify-self: start; }
+      #picker select { background: var(--coffee-bean); color: var(--fg); border: 1px solid rgba(255,247,237,0.25); border-radius: 4px; padding: 0.2rem; font: inherit; }
+      #picker output { font-variant-numeric: tabular-nums; color: var(--muted); text-align: right; white-space: nowrap; }
+      #picker .row { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+      #picker code { user-select: all; color: var(--muted); font-size: 12px; word-break: break-all; }
+      #picker button { font: inherit; background: transparent; color: var(--fg); border: 1px solid rgba(255,247,237,0.25); border-radius: 4px; padding: 0.2rem 0.6rem; cursor: pointer; }
+      #picker button:hover { border-color: var(--accent); }
+      body.hide-picker #picker { display: none; }
+      body.hide-picker main { padding-bottom: 2rem; }
+      body.hide-picker footer { display: block; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1 class="wordmark"><span class="wordmark__sprue">sprue</span><span class="wordmark__dot">.</span><span class="wordmark__works">works</span></h1>
+    </main>
+    <footer><a href="https://polyglot.sprue.works">Polyglot Slides</a></footer>
+
+    <form id="picker" onsubmit="return false">
+      <fieldset>
+        <legend>sprue</legend>
+        <label>Family <select name="f_s"></select><output></output></label>
+        <label>Weight <input type="range" name="w_s" step="100" /><output name="ow_s"></output></label>
+        <label>Letter-spacing <input type="range" name="ls_s" min="-0.08" max="0.08" step="0.005" /><output name="ols_s"></output></label>
+        <label>Colour <select name="c_s" data-palette></select><output></output></label>
+      </fieldset>
+      <fieldset>
+        <legend>dot</legend>
+        <label>Follows <select name="lock_d"><option value="sprue">sprue</option><option value="works">works</option><option value="none">nothing (own settings)</option></select><output></output></label>
+        <label>Family <select name="f_d"></select><output></output></label>
+        <label>Weight <input type="range" name="w_d" step="100" /><output name="ow_d"></output></label>
+        <label>Colour <select name="c_d" data-palette></select><output></output></label>
+        <label>Gap before <input type="range" name="dotb" min="-0.2" max="0.2" step="0.005" /><output name="odotb"></output></label>
+        <label>Gap after <input type="range" name="dota" min="-0.2" max="0.2" step="0.005" /><output name="odota"></output></label>
+      </fieldset>
+      <fieldset>
+        <legend>works</legend>
+        <label>Follows sprue <input type="checkbox" name="lock_w" /><output></output></label>
+        <label>Family <select name="f_w"></select><output></output></label>
+        <label>Weight <input type="range" name="w_w" step="100" /><output name="ow_w"></output></label>
+        <label>Letter-spacing <input type="range" name="ls_w" min="-0.08" max="0.08" step="0.005" /><output name="ols_w"></output></label>
+        <label>Colour <select name="c_w" data-palette></select><output></output></label>
+        <label>Match x-height <input type="checkbox" name="xh" /><output name="oxh"></output></label>
+        <label>Match width <input type="checkbox" name="wd" /><output name="owd"></output></label>
+        <label id="pitchrow" hidden>Match pitch (mono) <input type="checkbox" name="pitch" /><output name="opitch"></output></label>
+      </fieldset>
+      <fieldset>
+        <legend>Page</legend>
+        <label>Background <select name="c_bg" data-palette></select><output></output></label>
+        <label id="recrow" hidden>Recursive MONO <input type="range" name="mono" min="0" max="1" step="0.05" /><output name="omono"></output></label>
+        <label id="caslrow" hidden>Recursive CASL <input type="range" name="casl" min="0" max="1" step="0.05" /><output name="ocasl"></output></label>
+        <div class="row"><button type="button" id="hide">Hide controls (press h)</button></div>
+        <code id="url"></code>
+      </fieldset>
+    </form>
+
+    <script>
+      // family -> [googleFontsName, minWeight, maxWeight, generic, fixedWeights?, axisSpec?]
+      const FAMILIES = {
+        "Nunito":              ["Nunito", 200, 1000, "sans-serif"],
+        "Quicksand":           ["Quicksand", 300, 700, "sans-serif"],
+        "Fredoka":             ["Fredoka", 300, 700, "sans-serif"],
+        "Outfit":              ["Outfit", 100, 900, "sans-serif"],
+        "DM Sans":             ["DM+Sans", 100, 1000, "sans-serif"],
+        "Sora":                ["Sora", 100, 800, "sans-serif"],
+        "Space Grotesk":       ["Space+Grotesk", 300, 700, "sans-serif"],
+        "Archivo":             ["Archivo", 100, 900, "sans-serif"],
+        "Chivo":               ["Chivo", 100, 900, "sans-serif"],
+        "IBM Plex Mono":       ["IBM+Plex+Mono", 100, 700, "monospace", [100,200,300,400,500,600,700]],
+        "Rubik":               ["Rubik", 300, 900, "sans-serif"],
+        "Bricolage Grotesque": ["Bricolage+Grotesque", 200, 800, "sans-serif"],
+        "Plus Jakarta Sans":   ["Plus+Jakarta+Sans", 200, 800, "sans-serif"],
+        "Manrope":             ["Manrope", 200, 800, "sans-serif"],
+        "Syne":                ["Syne", 400, 800, "sans-serif"],
+        "Baloo 2":             ["Baloo+2", 400, 800, "sans-serif"],
+        "JetBrains Mono":      ["JetBrains+Mono", 100, 800, "monospace"],
+        "Space Mono":          ["Space+Mono", 400, 700, "monospace", [400,700]],
+        "Ubuntu Sans Mono":    ["Ubuntu+Sans+Mono", 400, 700, "monospace"],
+        "Spline Sans Mono":    ["Spline+Sans+Mono", 300, 700, "monospace"],
+        "Atkinson Hyperlegible Mono": ["Atkinson+Hyperlegible+Mono", 200, 800, "monospace"],
+        "Sometype Mono":       ["Sometype+Mono", 400, 700, "monospace"],
+        "Recursive":           ["Recursive", 300, 1000, "sans-serif", null, "wght,CASL,MONO@300..1000,0..1,0..1"],
+      };
+
+      const PALETTE = { "bronze-spice": ["Bronze Spice", "#c2571b"], "pumpkin-spice": ["Pumpkin Spice", "#f97316"], "pine-teal": ["Pine Teal", "#134e4a"], "royal-gold": ["Royal Gold", "#f9dc5c"], "floral-white": ["Floral White", "#fff7ed"], "muted-teal": ["Muted Teal", "#7fc6a4"], "rust-brown": ["Rust Brown", "#904114"], "coffee-bean": ["Coffee Bean", "#251818"] };
+      const LEGACY_DOT = { accent: "pumpkin-spice", fg: "floral-white", rust: "bronze-spice", yellow: "royal-gold", mint: "muted-teal" };
+      const col = (k, d) => PALETTE[q.get(k)] ? q.get(k) : d;
+
+      document.getElementById("gf").href = "https://fonts.googleapis.com/css2?" +
+        Object.values(FAMILIES).map(([gf, lo, hi, , fixed, axes]) =>
+          "family=" + gf + ":" + (axes || ("wght@" + (fixed ? fixed.join(";") : lo + ".." + hi)))).join("&") + "&display=swap";
+
+      const form = document.getElementById("picker");
+      const root = document.documentElement.style;
+      const q = new URLSearchParams(location.search);
+      const parse = (v, dFam, dW) => { const [f, w] = (v || "").split(":"); return [FAMILIES[f] ? f : dFam, +w || dW]; };
+      const num = (k, d) => (q.has(k) ? +q.get(k) : d);
+
+      // ---- state (all of it round-trips through the URL) ----
+      // Defaults are the production combination from the "Typefaces" block in
+      // /style.css (Quicksand 700 / Nunito 300 / IBM Plex Mono 300, x-height and
+      // width matched, dot pulled 0.035em towards "works"), in the colours of
+      // whichever scheme the OS prefers. Keep them in sync with that block.
+      const dark = matchMedia("(prefers-color-scheme: dark)").matches;
+      const S = {};
+      [S.fS, S.wS] = parse(q.get("sprue"), "Quicksand", 700);
+      [S.fW, S.wW] = parse(q.get("works"), "IBM Plex Mono", 300);
+      S.lockW = S.fW === S.fS && S.wW === S.wS;
+      S.lockD = ["sprue", "works", "none"].includes(q.get("dotlock")) ? q.get("dotlock") : "none";
+      [S.fD, S.wD] = parse(q.get("dotfont"), "Nunito", 300);
+      S.lsS = num("lss", num("ls", 0)); S.lsW = num("lsw", num("ls", 0));
+      S.cS = col("cs", dark ? "floral-white" : "coffee-bean"); S.cW = col("cw", dark ? "pumpkin-spice" : "rust-brown"); S.cBg = col("bg", dark ? "coffee-bean" : "floral-white");
+      S.cD = col("cd", LEGACY_DOT[q.get("dot")] || (dark ? "muted-teal" : "pine-teal"));
+      S.dotB = num("dotb", 0); S.dotA = num("dota", -0.035);
+      S.mono = num("mono", 1); S.casl = num("casl", 1);
+      S.xh = q.get("xh") !== "0"; S.wd = q.has("width") ? q.get("width") === "1" : true; S.pitch = q.get("pitch") !== "0";
+      let xscale = 1, dscale = 1, pitchLs = 0, widthLs = 0, measureTimer;
+
+      for (const sel of [form.f_s, form.f_w, form.f_d]) for (const name of Object.keys(FAMILIES)) sel.add(new Option(name, name));
+      for (const sel of form.querySelectorAll("select[data-palette]")) for (const [k, [name, hex]] of Object.entries(PALETTE)) { const o = new Option(`${name} ${hex}`, k); o.style.background = hex; o.style.color = k === "floral-white" || k === "royal-gold" || k === "muted-teal" ? "#251818" : "#fff7ed"; sel.add(o); }
+      const snap = (fam, w) => { const [, lo, hi, , fixed] = FAMILIES[fam]; if (fixed) return fixed.reduce((a, b) => Math.abs(b - w) < Math.abs(a - w) ? b : a); return Math.min(hi, Math.max(lo, Math.round(w / 100) * 100)); };
+      const stack = (fam) => `"${fam}", system-ui, -apple-system, "Segoe UI", ${FAMILIES[fam][3]}`;
+      const fvs = (fam) => fam === "Recursive" ? `"MONO" ${S.mono}, "CASL" ${S.casl}` : "normal";
+      const isMono = (fam) => FAMILIES[fam][3] === "monospace" || (fam === "Recursive" && S.mono >= 0.5);
+
+      // ---- measurement (canvas, 100px, current variation axes) ----
+      const ctx = document.createElement("canvas").getContext("2d");
+      const metric = (fam, w, fn) => {
+        const face = `${w} 100px "${fam}"`;
+        if (!document.fonts.check(face)) return null;
+        if ("fontVariationSettings" in ctx) ctx.fontVariationSettings = fvs(fam);
+        ctx.font = face; return fn(ctx.measureText("x"));
+      };
+      const xHeight = (fam, w) => metric(fam, w, (m) => m.actualBoundingBoxAscent);
+      const advance = (fam, w) => metric(fam, w, (m) => m.width);
+      const later = () => { clearTimeout(measureTimer); measureTimer = setTimeout(render, 150); };
+      // Rendered width of a word span minus the trailing letter-spacing after its last glyph.
+      const inkWidth = (sel) => { const el = document.querySelector(sel); const r = document.createRange(); r.selectNodeContents(el); return r.getBoundingClientRect().width - (parseFloat(getComputedStyle(el).letterSpacing) || 0); };
+
+      function render() {
+        if (S.lockW) { S.fW = S.fS; S.wW = S.wS; S.lsW = S.lsS; }
+        if (S.lockD === "sprue") { S.fD = S.fS; S.wD = S.wS; } else if (S.lockD === "works") { S.fD = S.fW; S.wD = S.wW; }
+        S.wS = snap(S.fS, S.wS); S.wW = snap(S.fW, S.wW); S.wD = snap(S.fD, S.wD);
+
+        // fonts
+        root.setProperty("--f-sprue", stack(S.fS)); root.setProperty("--w-sprue", S.wS); root.setProperty("--fvs-sprue", fvs(S.fS)); root.setProperty("--ls-sprue", S.lsS + "em");
+        root.setProperty("--f-works", stack(S.fW)); root.setProperty("--w-works", S.wW); root.setProperty("--fvs-works", fvs(S.fW)); root.setProperty("--ls-works", S.lsW + "em");
+        root.setProperty("--f-dot", stack(S.fD)); root.setProperty("--w-dot", S.wD); root.setProperty("--fvs-dot", fvs(S.fD));
+        root.setProperty("--c-sprue", PALETTE[S.cS][1]); root.setProperty("--c-dot", PALETTE[S.cD][1]); root.setProperty("--c-works", PALETTE[S.cW][1]); root.setProperty("--bg", PALETTE[S.cBg][1]);
+        root.setProperty("--dot-before", S.dotB + "em"); root.setProperty("--dot-after", S.dotA + "em");
+
+        // x-height: scale works so its lowercase x matches sprue's; the dot follows whichever side it locks to
+        const differs = S.fS !== S.fW || S.wS !== S.wW || S.fS === "Recursive";
+        if (S.xh && differs) { const a = xHeight(S.fS, S.wS), b = xHeight(S.fW, S.wW); if (a && b) xscale = a / b; else later(); } else xscale = 1;
+        dscale = S.lockD === "works" ? xscale : 1;
+        root.setProperty("--xscale", xscale.toFixed(4)); root.setProperty("--dscale", dscale.toFixed(4));
+
+        // pitch: two monos -> tracking on works so per-character advance matches sprue's (words only)
+        const bothMono = isMono(S.fS) && isMono(S.fW) && (S.fS !== S.fW || S.wS !== S.wW || S.lsS !== S.lsW);
+        document.getElementById("pitchrow").hidden = !bothMono;
+        if (S.pitch && bothMono && !S.wd) { const a = advance(S.fS, S.wS), b = advance(S.fW, S.wW); if (a && b) pitchLs = (a / 100 + S.lsS) / xscale - b / 100 - S.lsW; else later(); } else pitchLs = 0;
+        root.setProperty("--pitch-ls", pitchLs.toFixed(4) + "em");
+
+        // width: tracking on works so the ink width of "works" equals that of "sprue" (dot excluded)
+        if (S.wd && (differs || S.lsS !== S.lsW)) {
+          root.setProperty("--width-ls", widthLs.toFixed(4) + "em");
+          const worksPx = parseFloat(getComputedStyle(document.querySelector(".wordmark__works")).fontSize);
+          const delta = inkWidth(".wordmark__sprue") - inkWidth(".wordmark__works");
+          if (Math.abs(delta) > 0.05 && worksPx) { widthLs += delta / (4 * worksPx); root.setProperty("--width-ls", widthLs.toFixed(4) + "em"); } // 4 inter-letter gaps in "works"
+        } else { widthLs = 0; root.setProperty("--width-ls", "0em"); }
+
+        // controls
+        const setRange = (el, fam, w) => { el.min = FAMILIES[fam][1]; el.max = FAMILIES[fam][2]; el.value = w; };
+        form.f_s.value = S.fS; setRange(form.w_s, S.fS, S.wS); form.ow_s.value = S.wS; form.ls_s.value = S.lsS; form.ols_s.value = S.lsS.toFixed(3) + "em";
+        form.lock_w.checked = S.lockW; form.f_w.value = S.fW; form.f_w.disabled = S.lockW; setRange(form.w_w, S.fW, S.wW); form.w_w.disabled = S.lockW; form.ow_w.value = S.wW; const trackingDriven = S.wd || (S.pitch && bothMono);
+        form.ls_w.value = S.lsW; form.ls_w.disabled = S.lockW || trackingDriven;
+        form.ols_w.value = (trackingDriven ? "= " : "") + (S.lsW + pitchLs + widthLs).toFixed(3) + "em";
+        form.lock_d.value = S.lockD; form.f_d.value = S.fD; form.f_d.disabled = S.lockD !== "none"; setRange(form.w_d, S.fD, S.wD); form.w_d.disabled = S.lockD !== "none"; form.ow_d.value = S.wD;
+        form.c_s.value = S.cS; form.c_d.value = S.cD; form.c_w.value = S.cW; form.c_bg.value = S.cBg;
+        form.dotb.value = S.dotB; form.dota.value = S.dotA; form.odotb.value = S.dotB.toFixed(3) + "em"; form.odota.value = S.dotA.toFixed(3) + "em";
+        form.xh.checked = S.xh; form.oxh.value = xscale === 1 ? "" : "×" + xscale.toFixed(3);
+        form.wd.checked = S.wd; form.owd.value = widthLs === 0 ? "" : (widthLs > 0 ? "+" : "") + widthLs.toFixed(3) + "em";
+        form.pitch.checked = S.pitch; form.pitch.disabled = S.wd; form.opitch.value = pitchLs === 0 ? "" : (pitchLs > 0 ? "+" : "") + pitchLs.toFixed(3) + "em";
+        const rec = [S.fS, S.fW, S.fD].includes("Recursive");
+        document.getElementById("recrow").hidden = document.getElementById("caslrow").hidden = !rec;
+        form.mono.value = S.mono; form.casl.value = S.casl; form.omono.value = S.mono.toFixed(2); form.ocasl.value = S.casl.toFixed(2);
+
+        // URL
+        const p = new URLSearchParams({ sprue: `${S.fS}:${S.wS}`, works: `${S.fW}:${S.wW}`, lss: S.lsS.toFixed(3), lsw: S.lsW.toFixed(3), cs: S.cS, cd: S.cD, cw: S.cW, bg: S.cBg });
+        p.set("dotlock", S.lockD); if (S.lockD === "none") p.set("dotfont", `${S.fD}:${S.wD}`);
+        if (S.dotB) p.set("dotb", S.dotB.toFixed(3)); if (S.dotA) p.set("dota", S.dotA.toFixed(3));
+        if (rec) { p.set("mono", S.mono.toFixed(2)); p.set("casl", S.casl.toFixed(2)); }
+        if (!S.xh) p.set("xh", "0"); p.set("width", S.wd ? "1" : "0"); if (!S.pitch) p.set("pitch", "0");
+        history.replaceState(null, "", "?" + p);
+        document.getElementById("url").textContent = location.href;
+      }
+
+      const bind = (name, fn) => { form[name].oninput = () => { fn(form[name]); render(); }; };
+      bind("f_s", (e) => { S.fS = e.value; }); bind("w_s", (e) => { S.wS = +e.value; }); bind("ls_s", (e) => { S.lsS = +e.value; });
+      bind("lock_w", (e) => { S.lockW = e.checked; }); bind("f_w", (e) => { S.fW = e.value; }); bind("w_w", (e) => { S.wW = +e.value; }); bind("ls_w", (e) => { S.lsW = +e.value; });
+      bind("lock_d", (e) => { S.lockD = e.value; }); bind("f_d", (e) => { S.fD = e.value; }); bind("w_d", (e) => { S.wD = +e.value; });
+      bind("c_s", (e) => { S.cS = e.value; }); bind("c_d", (e) => { S.cD = e.value; }); bind("c_w", (e) => { S.cW = e.value; }); bind("c_bg", (e) => { S.cBg = e.value; });
+      bind("dotb", (e) => { S.dotB = +e.value; }); bind("dota", (e) => { S.dotA = +e.value; });
+      bind("mono", (e) => { S.mono = +e.value; }); bind("casl", (e) => { S.casl = +e.value; });
+      bind("xh", (e) => { S.xh = e.checked; }); bind("wd", (e) => { S.wd = e.checked; widthLs = 0; }); bind("pitch", (e) => { S.pitch = e.checked; });
+      const toggle = () => document.body.classList.toggle("hide-picker");
+      document.getElementById("hide").onclick = toggle;
+      addEventListener("keydown", (e) => { if (e.key === "h" && document.activeElement.tagName !== "SELECT") toggle(); });
+      document.fonts.addEventListener("loadingdone", render);
+      render();
+    </script>
+  </body>
+</html>
