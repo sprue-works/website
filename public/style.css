@@ -1,58 +1,26 @@
-/* ---- Typefaces -----------------------------------------------------------
-   Chosen with the picker on the typeface/picker branch (2026-09-03). Change
-   this block together with the Google Fonts <link> in index.html; nothing
-   else on the page depends on it.
-     sprue  Quicksand 700
-     .      Nunito 300, pulled 0.035em closer to "works"
-     works  IBM Plex Mono 300, scaled 1.0368x so its x-height matches
-            Quicksand's, and tracked -0.0939em so the word is as wide as "sprue" */
+/* The tokens (typefaces, palette, light/dark scheme) come from the hosted
+   brand theme, linked before this file in index.html:
+     /brand/v1/theme.css  (source: public/brand/v1/theme.css, docs: brand/README.md)
+   This file only composes them. Every var() carries a fallback so the page
+   degrades to readable system styling if the theme fails to load. */
 :root {
-  --font-sprue: "Quicksand", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --weight-sprue: 700;
-  --font-dot: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --weight-dot: 300;
-  --dot-gap-after: -0.035em;
-  --font-works: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-  --weight-works: 300;
-  --works-scale: 1.0368;
-  --works-tracking: -0.0939em;
-}
-
-/* ---- Palette (coolors.co/palette/c2571b-f97316-134e4a-f9dc5c-fff7ed-7fc6a4-904114-251818) */
-:root {
-  --bronze-spice: #c2571b;
-  --pumpkin-spice: #f97316;
-  --pine-teal: #134e4a;
-  --royal-gold: #f9dc5c;
-  --floral-white: #fff7ed;
-  --muted-teal: #7fc6a4;
-  --rust-brown: #904114;
-  --coffee-bean: #251818;
-
-  /* Light scheme (default) */
-  --bg: var(--floral-white);
-  --color-sprue: var(--coffee-bean);
-  --color-dot: var(--pine-teal);
-  --color-works: var(--rust-brown);
-  --fg: var(--coffee-bean);
-  --muted: #7d6e69; /* fallback for browsers without color-mix() */
-  --muted: color-mix(in srgb, var(--coffee-bean) 60%, var(--floral-white));
-  --accent: var(--rust-brown);
-  color-scheme: light;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: var(--coffee-bean);
-    --color-sprue: var(--floral-white);
-    --color-dot: var(--muted-teal);
-    --color-works: var(--pumpkin-spice);
-    --fg: var(--floral-white);
-    --muted: #9d938d;
-    --muted: color-mix(in srgb, var(--floral-white) 55%, var(--coffee-bean));
-    --accent: var(--pumpkin-spice);
-    color-scheme: dark;
-  }
+  --bg: var(--sw-bg, #fff7ed);
+  --fg: var(--sw-fg, #251818);
+  --muted: var(--sw-muted, #7d6e69);
+  --accent: var(--sw-accent, #904114);
+  --color-sprue: var(--sw-color-sprue, #251818);
+  --color-dot: var(--sw-color-dot, #134e4a);
+  --color-works: var(--sw-color-works, #904114);
+  --font-body: var(--sw-font-body, system-ui, sans-serif);
+  --font-sprue: var(--sw-font-sprue, system-ui, sans-serif);
+  --weight-sprue: var(--sw-weight-sprue, 700);
+  --font-dot: var(--sw-font-dot, system-ui, sans-serif);
+  --weight-dot: var(--sw-weight-dot, 300);
+  --dot-gap-after: var(--sw-dot-gap-after, 0em);
+  --font-works: var(--sw-font-works, ui-monospace, monospace);
+  --weight-works: var(--sw-weight-works, 300);
+  --works-scale: var(--sw-works-scale, 1);
+  --works-tracking: var(--sw-works-tracking, 0em);
 }
 
 *,
@@ -73,7 +41,7 @@ body {
   min-height: 100dvh;
   background: var(--bg);
   color: var(--fg);
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
