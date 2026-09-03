@@ -129,7 +129,9 @@
 
       const PALETTE = { "bronze-spice": ["Bronze Spice", "#c2571b"], "pumpkin-spice": ["Pumpkin Spice", "#f97316"], "pine-teal": ["Pine Teal", "#134e4a"], "royal-gold": ["Royal Gold", "#f9dc5c"], "floral-white": ["Floral White", "#fff7ed"], "muted-teal": ["Muted Teal", "#7fc6a4"], "rust-brown": ["Rust Brown", "#904114"], "coffee-bean": ["Coffee Bean", "#251818"] };
       const LEGACY_DOT = { accent: "pumpkin-spice", fg: "floral-white", rust: "bronze-spice", yellow: "royal-gold", mint: "muted-teal" };
-      const col = (k, d) => PALETTE[q.get(k)] ? q.get(k) : d;
+      // Keys from the URL are checked as own properties so inherited names (__proto__, constructor) are rejected.
+      const own = (o, k) => Object.hasOwn(o, k);
+      const col = (k, d) => own(PALETTE, q.get(k)) ? q.get(k) : d;
 
       document.getElementById("gf").href = "https://fonts.googleapis.com/css2?" +
         Object.values(FAMILIES).map(([gf, lo, hi, , fixed, axes]) =>
@@ -138,7 +140,7 @@
       const form = document.getElementById("picker");
       const root = document.documentElement.style;
       const q = new URLSearchParams(location.search);
-      const parse = (v, dFam, dW) => { const [f, w] = (v || "").split(":"); return [FAMILIES[f] ? f : dFam, +w || dW]; };
+      const parse = (v, dFam, dW) => { const [f, w] = (v || "").split(":"); return [own(FAMILIES, f) ? f : dFam, +w || dW]; };
       const num = (k, d) => (q.has(k) ? +q.get(k) : d);
 
       // ---- state (all of it round-trips through the URL) ----
@@ -155,7 +157,7 @@
       [S.fD, S.wD] = parse(q.get("dotfont"), "Nunito", 300);
       S.lsS = num("lss", num("ls", 0)); S.lsW = num("lsw", num("ls", 0));
       S.cS = col("cs", dark ? "floral-white" : "coffee-bean"); S.cW = col("cw", dark ? "pumpkin-spice" : "rust-brown"); S.cBg = col("bg", dark ? "coffee-bean" : "floral-white");
-      S.cD = col("cd", LEGACY_DOT[q.get("dot")] || (dark ? "muted-teal" : "pine-teal"));
+      S.cD = col("cd", own(LEGACY_DOT, q.get("dot")) ? LEGACY_DOT[q.get("dot")] : (dark ? "muted-teal" : "pine-teal"));
       S.dotB = num("dotb", 0); S.dotA = num("dota", -0.035);
       S.mono = num("mono", 1); S.casl = num("casl", 1);
       S.xh = q.get("xh") !== "0"; S.wd = q.has("width") ? q.get("width") === "1" : true; S.pitch = q.get("pitch") !== "0";
