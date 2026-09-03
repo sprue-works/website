@@ -53,13 +53,16 @@ this GitHub repo.
 You can also deploy from a laptop with `npx wrangler login && npx wrangler
 deploy`; Workers Builds is what keeps `main` and the branch previews in sync.
 
-## Wordmark and typeface
+## Wordmark, typefaces, and colours
 
-The wordmark is plain text until the logo (#1) lands. `sprue` and `.works` are
-separate spans so they can be styled independently; swapping in the SVG is a
+The wordmark is plain text until the logo (#1) lands: three spans (`sprue`, the
+dot, `works`) so each can be styled on its own; swapping in the SVG is a
 one-line change described in the comment above the `<h1>` in
 `public/index.html`.
 
-The typeface is set in one place: the `--wordmark-font` block at the top of
-`public/style.css`, together with the Google Fonts `<link>` in
-`public/index.html`.
+Typefaces and colours were chosen with the interactive picker on the
+`typeface/picker` branch and are set in one place: the "Typefaces" block at the
+top of `public/style.css`, together with the Google Fonts `<link>` in
+`public/index.html`. The page follows the OS colour scheme: Floral White
+background with Coffee Bean / Pine Teal / Rust Brown text in light mode, Coffee
+Bean background with Floral White / Muted Teal / Pumpkin Spice in dark mode.
