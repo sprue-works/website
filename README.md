@@ -125,7 +125,10 @@ one-line change described in the comment above the `<h1>` in
 Typefaces and colours were chosen with the interactive picker, which now lives
 at `public/picker/index.html`, served unlinked and `noindex`ed at
 https://sprue.works/picker (a tool, not a page of the site; it loads extra
-Google Fonts families from the same host the theme already uses). They are
+Google Fonts families from the same host the theme already uses). Below
+the wordmark it renders sample body copy and a code snippet in separately
+chosen Body and Code faces, so candidates can be judged as running text and
+not only as display type. They are
 defined once, as `--sw-*` custom properties in the hosted brand theme
 `public/brand/v1/theme.css` (served at https://sprue.works/brand/v1/theme.css
 with a long immutable cache via `public/_headers`); `public/style.css` only
