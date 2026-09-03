@@ -60,8 +60,11 @@ dot, `works`) so each can be styled on its own; swapping in the SVG is a
 one-line change described in the comment above the `<h1>` in
 `public/index.html`.
 
-Typefaces and colours were chosen with the interactive picker on the
-`typeface/picker` branch and are set in one place: the "Typefaces" block at the
+Typefaces and colours were chosen with the interactive picker, which lives on
+at `public/picker/index.html`, served unlinked and `noindex`ed at
+https://sprue.works/picker (a tool, not a page of the site; it loads extra
+Google Fonts families from the same host the home page already uses). They are
+set in one place: the "Typefaces" block at the
 top of `public/style.css`, together with the Google Fonts `<link>` in
 `public/index.html`. The page follows the OS colour scheme: Floral White
 background with Coffee Bean / Pine Teal / Rust Brown text in light mode, Coffee
