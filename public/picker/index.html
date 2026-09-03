@@ -20,7 +20,7 @@
       .wordmark__sprue { color: var(--c-sprue); font-family: var(--f-sprue); font-weight: var(--w-sprue); font-variation-settings: var(--fvs-sprue, normal); letter-spacing: var(--ls-sprue, 0em); }
       .wordmark__dot   { font-family: var(--f-dot);   font-weight: var(--w-dot);   font-variation-settings: var(--fvs-dot, normal);   font-size: calc(1em * var(--dscale, 1)); color: var(--c-dot); margin-left: var(--dot-before, 0em); margin-right: var(--dot-after, 0em); letter-spacing: 0; }
       .wordmark__works { color: var(--c-works); font-family: var(--f-works); font-weight: var(--w-works); font-variation-settings: var(--fvs-works, normal); font-size: calc(1em * var(--xscale, 1)); letter-spacing: calc(var(--ls-works, 0em) + var(--pitch-ls, 0em) + var(--width-ls, 0em)); }
-      main { padding-bottom: 24rem; }
+      main { padding-bottom: calc(var(--panel-h, 24rem) + 2rem); } /* --panel-h is the measured height of #picker */
       /* Sample body copy (#8): judges the Body and Code roles as running text.
          Kept visually secondary to the wordmark: measure-limited, 1rem, and
          coloured from the same picker variables as the wordmark. */
@@ -317,6 +317,8 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
       const toggle = () => document.body.classList.toggle("hide-picker");
       document.getElementById("hide").onclick = toggle;
       addEventListener("keydown", (e) => { if (e.key === "h" && document.activeElement.tagName !== "SELECT") toggle(); });
+      // Keep the sample clear of the fixed panel whatever height the panel takes (it caps at 70vh and scrolls).
+      new ResizeObserver(() => root.setProperty("--panel-h", form.offsetHeight + "px")).observe(form);
       document.fonts.addEventListener("loadingdone", render);
       render();
     </script>
