@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link id="gf" rel="stylesheet" href="" />
+    <link rel="stylesheet" href="/brand/v1/theme.css" />
     <link rel="stylesheet" href="/style.css" />
     <style>
       /* Picker-only additions; the page above the strip is the real home.
@@ -25,14 +26,14 @@
       #picker {
         /* The panel is always dark, whatever the OS scheme or the chosen
            background, so pin its own fg/accent/muted rather than inheriting
-           the light-scheme values from /style.css. */
-        --fg: var(--floral-white);
-        --accent: var(--pumpkin-spice);
+           the light-scheme values from /brand/v1/theme.css. */
+        --fg: var(--sw-floral-white, #fff7ed);
+        --accent: var(--sw-pumpkin-spice, #f97316);
         --muted: #9d938d;
-        --muted: color-mix(in srgb, var(--floral-white) 55%, var(--coffee-bean));
+        --muted: color-mix(in srgb, var(--sw-floral-white, #fff7ed) 55%, var(--sw-coffee-bean, #251818));
         color-scheme: dark;
         position: fixed; inset: auto 0 0 0; z-index: 10;
-        background: color-mix(in srgb, var(--coffee-bean) 88%, black);
+        background: color-mix(in srgb, var(--sw-coffee-bean, #251818) 88%, black);
         border-top: 1px solid rgba(255, 247, 237, 0.12);
         color: var(--fg); font: 13px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
         padding: 0.75rem 1rem 1rem; display: grid; gap: 0.6rem 1.25rem;
@@ -44,7 +45,7 @@
       #picker label[hidden] { display: none; }
       #picker select, #picker input[type=range] { width: 100%; accent-color: var(--accent); }
       #picker input[type=checkbox] { justify-self: start; }
-      #picker select { background: var(--coffee-bean); color: var(--fg); border: 1px solid rgba(255,247,237,0.25); border-radius: 4px; padding: 0.2rem; font: inherit; }
+      #picker select { background: var(--sw-coffee-bean, #251818); color: var(--fg); border: 1px solid rgba(255,247,237,0.25); border-radius: 4px; padding: 0.2rem; font: inherit; }
       #picker output { font-variant-numeric: tabular-nums; color: var(--muted); text-align: right; white-space: nowrap; }
       #picker .row { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
       #picker code { user-select: all; color: var(--muted); font-size: 12px; word-break: break-all; }
@@ -144,10 +145,10 @@
       const num = (k, d) => (q.has(k) ? +q.get(k) : d);
 
       // ---- state (all of it round-trips through the URL) ----
-      // Defaults are the production combination from the "Typefaces" block in
-      // /style.css (Quicksand 700 / Nunito 300 / IBM Plex Mono 300, x-height and
+      // Defaults are the production combination from the wordmark tokens in
+      // /brand/v1/theme.css (Quicksand 700 / Nunito 300 / IBM Plex Mono 300, x-height and
       // width matched, dot pulled 0.035em towards "works"), in the colours of
-      // whichever scheme the OS prefers. Keep them in sync with that block.
+      // whichever scheme the OS prefers. Keep them in sync with those tokens.
       const dark = matchMedia("(prefers-color-scheme: dark)").matches;
       const S = {};
       [S.fS, S.wS] = parse(q.get("sprue"), "Quicksand", 700);
