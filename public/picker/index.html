@@ -20,7 +20,20 @@
       .wordmark__sprue { color: var(--c-sprue); font-family: var(--f-sprue); font-weight: var(--w-sprue); font-variation-settings: var(--fvs-sprue, normal); letter-spacing: var(--ls-sprue, 0em); }
       .wordmark__dot   { font-family: var(--f-dot);   font-weight: var(--w-dot);   font-variation-settings: var(--fvs-dot, normal);   font-size: calc(1em * var(--dscale, 1)); color: var(--c-dot); margin-left: var(--dot-before, 0em); margin-right: var(--dot-after, 0em); letter-spacing: 0; }
       .wordmark__works { color: var(--c-works); font-family: var(--f-works); font-weight: var(--w-works); font-variation-settings: var(--fvs-works, normal); font-size: calc(1em * var(--xscale, 1)); letter-spacing: calc(var(--ls-works, 0em) + var(--pitch-ls, 0em) + var(--width-ls, 0em)); }
-      main { padding-bottom: 16rem; }
+      main { padding-bottom: 24rem; }
+      /* Sample body copy (#8): judges the Body and Code roles as running text.
+         Kept visually secondary to the wordmark: measure-limited, 1rem, and
+         coloured from the same picker variables as the wordmark. */
+      #sample { max-width: 34rem; margin: 3rem auto 0; padding: 0 1rem; color: var(--c-sprue); font-family: var(--f-body); font-weight: var(--w-body); font-variation-settings: var(--fvs-body, normal); font-size: 1rem; line-height: 1.55; }
+      #sample h2 { font: inherit; font-weight: var(--w-heading); font-size: 1.4rem; line-height: 1.2; margin: 0 0 0.75rem; }
+      #sample p, #sample ul { margin: 0 0 0.9rem; }
+      #sample ul { padding-left: 1.25rem; }
+      #sample a { color: var(--c-works); text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+      #sample code, #sample pre { font-family: var(--f-code); font-weight: var(--w-code); font-variation-settings: var(--fvs-code, normal); }
+      #sample code { font-size: 0.92em; }
+      #sample pre { font-size: 0.85rem; line-height: 1.5; margin: 0 0 0.9rem; padding: 0.75rem 1rem; border-radius: 6px; overflow-x: auto; background: color-mix(in srgb, var(--c-sprue) 7%, transparent); }
+      #sample small { display: block; font-size: 0.78rem; color: color-mix(in srgb, var(--c-sprue) 65%, var(--bg)); }
+      body.hide-sample #sample { display: none; }
       footer { display: none; }
       #picker {
         /* The panel is always dark, whatever the OS scheme or the chosen
@@ -31,7 +44,7 @@
         --muted: #9d938d;
         --muted: color-mix(in srgb, var(--floral-white) 55%, var(--coffee-bean));
         color-scheme: dark;
-        position: fixed; inset: auto 0 0 0; z-index: 10;
+        position: fixed; inset: auto 0 0 0; z-index: 10; max-height: 70vh; overflow-y: auto;
         background: color-mix(in srgb, var(--coffee-bean) 88%, black);
         border-top: 1px solid rgba(255, 247, 237, 0.12);
         color: var(--fg); font: 13px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -58,6 +71,19 @@
   <body>
     <main>
       <h1 class="wordmark"><span class="wordmark__sprue">sprue</span><span class="wordmark__dot">.</span><span class="wordmark__works">works</span></h1>
+      <section id="sample" aria-label="Sample body text">
+        <h2>Small things, made to fit</h2>
+        <p>sprue.works is a workshop for small software: tools that do one job, ship as a single page where they can, and leave the machine cleaner than they found it. The first is <a href="https://polyglot.sprue.works">Polyglot Slides</a>, which turns a Markdown file into a talk.</p>
+        <ul>
+          <li>Plain HTML and CSS; no build step.</li>
+          <li>Type set at 16px on a 34rem measure, 1.55 leading.</li>
+          <li>Numerals: 0123456789, &pound;4.50, 3&times;7&nbsp;=&nbsp;21, 1998&ndash;2026.</li>
+        </ul>
+        <p>Run it with <code>npx wrangler dev</code>; deploys go through Workers Builds on push. &ldquo;Quotes,&rdquo; semicolons; colons: and (parentheses) &amp; ampersands all get a turn &mdash; as does the em dash.</p>
+<pre>const stack = (fam) =&gt; `"${fam}", system-ui, sans-serif`;
+if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
+        <small>Set in the Body and Code faces chosen below; the wordmark above is Display. Press h to hide the controls.</small>
+      </section>
     </main>
     <footer><a href="https://polyglot.sprue.works">Polyglot Slides</a></footer>
 
@@ -88,6 +114,20 @@
         <label>Match x-height <input type="checkbox" name="xh" /><output name="oxh"></output></label>
         <label>Match width <input type="checkbox" name="wd" /><output name="owd"></output></label>
         <label id="pitchrow" hidden>Match pitch (mono) <input type="checkbox" name="pitch" /><output name="opitch"></output></label>
+      </fieldset>
+      <fieldset>
+        <legend>Body</legend>
+        <label>Follows <select name="lock_b"><option value="sprue">sprue</option><option value="works">works</option><option value="dot">dot</option><option value="none">nothing (own settings)</option></select><output></output></label>
+        <label>Family <select name="f_b"></select><output></output></label>
+        <label>Weight <input type="range" name="w_b" step="100" /><output name="ow_b"></output></label>
+        <label>Heading weight <input type="range" name="w_h" step="100" /><output name="ow_h"></output></label>
+        <label>Show sample <input type="checkbox" name="sample" /><output></output></label>
+      </fieldset>
+      <fieldset>
+        <legend>Code</legend>
+        <label>Follows <select name="lock_c"><option value="sprue">sprue</option><option value="works">works</option><option value="dot">dot</option><option value="body">body</option><option value="none">nothing (own settings)</option></select><output></output></label>
+        <label>Family <select name="f_c"></select><output></output></label>
+        <label>Weight <input type="range" name="w_c" step="100" /><output name="ow_c"></output></label>
       </fieldset>
       <fieldset>
         <legend>Page</legend>
@@ -160,10 +200,18 @@
       S.cD = col("cd", own(LEGACY_DOT, q.get("dot")) ? LEGACY_DOT[q.get("dot")] : (dark ? "muted-teal" : "pine-teal"));
       S.dotB = num("dotb", 0); S.dotA = num("dota", -0.035);
       S.mono = num("mono", 1); S.casl = num("casl", 1);
+      // Body and Code roles (#8): the sample block follows these; each can
+      // track a wordmark role or carry its own face. Defaults are production.
+      S.lockB = ["sprue", "works", "dot", "none"].includes(q.get("bodylock")) ? q.get("bodylock") : "none";
+      [S.fB, S.wB] = parse(q.get("body"), "Nunito", 400);
+      S.wH = num("heading", 700);
+      S.lockC = ["sprue", "works", "dot", "body", "none"].includes(q.get("codelock")) ? q.get("codelock") : "works";
+      [S.fC, S.wC] = parse(q.get("code"), "IBM Plex Mono", 300);
+      S.sample = q.get("sample") !== "0";
       S.xh = q.get("xh") !== "0"; S.wd = q.has("width") ? q.get("width") === "1" : true; S.pitch = q.get("pitch") !== "0";
       let xscale = 1, dscale = 1, pitchLs = 0, widthLs = 0, measureTimer;
 
-      for (const sel of [form.f_s, form.f_w, form.f_d]) for (const name of Object.keys(FAMILIES)) sel.add(new Option(name, name));
+      for (const sel of [form.f_s, form.f_w, form.f_d, form.f_b, form.f_c]) for (const name of Object.keys(FAMILIES)) sel.add(new Option(name, name));
       for (const sel of form.querySelectorAll("select[data-palette]")) for (const [k, [name, hex]] of Object.entries(PALETTE)) { const o = new Option(`${name} ${hex}`, k); o.style.background = hex; o.style.color = k === "floral-white" || k === "royal-gold" || k === "muted-teal" ? "#251818" : "#fff7ed"; sel.add(o); }
       const snap = (fam, w) => { const [, lo, hi, , fixed] = FAMILIES[fam]; if (fixed) return fixed.reduce((a, b) => Math.abs(b - w) < Math.abs(a - w) ? b : a); return Math.min(hi, Math.max(lo, Math.round(w / 100) * 100)); };
       const stack = (fam) => `"${fam}", system-ui, -apple-system, "Segoe UI", ${FAMILIES[fam][3]}`;
@@ -188,11 +236,19 @@
         if (S.lockW) { S.fW = S.fS; S.wW = S.wS; S.lsW = S.lsS; }
         if (S.lockD === "sprue") { S.fD = S.fS; S.wD = S.wS; } else if (S.lockD === "works") { S.fD = S.fW; S.wD = S.wW; }
         S.wS = snap(S.fS, S.wS); S.wW = snap(S.fW, S.wW); S.wD = snap(S.fD, S.wD);
+        const role = { sprue: [S.fS, S.wS], works: [S.fW, S.wW], dot: [S.fD, S.wD] };
+        if (S.lockB !== "none") [S.fB, S.wB] = role[S.lockB];
+        S.wB = snap(S.fB, S.wB); S.wH = snap(S.fB, S.wH);
+        if (S.lockC !== "none") [S.fC, S.wC] = S.lockC === "body" ? [S.fB, S.wB] : role[S.lockC];
+        S.wC = snap(S.fC, S.wC);
 
         // fonts
         root.setProperty("--f-sprue", stack(S.fS)); root.setProperty("--w-sprue", S.wS); root.setProperty("--fvs-sprue", fvs(S.fS)); root.setProperty("--ls-sprue", S.lsS + "em");
         root.setProperty("--f-works", stack(S.fW)); root.setProperty("--w-works", S.wW); root.setProperty("--fvs-works", fvs(S.fW)); root.setProperty("--ls-works", S.lsW + "em");
         root.setProperty("--f-dot", stack(S.fD)); root.setProperty("--w-dot", S.wD); root.setProperty("--fvs-dot", fvs(S.fD));
+        root.setProperty("--f-body", stack(S.fB)); root.setProperty("--w-body", S.wB); root.setProperty("--fvs-body", fvs(S.fB)); root.setProperty("--w-heading", S.wH);
+        root.setProperty("--f-code", stack(S.fC)); root.setProperty("--w-code", S.wC); root.setProperty("--fvs-code", fvs(S.fC));
+        document.body.classList.toggle("hide-sample", !S.sample);
         root.setProperty("--c-sprue", PALETTE[S.cS][1]); root.setProperty("--c-dot", PALETTE[S.cD][1]); root.setProperty("--c-works", PALETTE[S.cW][1]); root.setProperty("--bg", PALETTE[S.cBg][1]);
         root.setProperty("--dot-before", S.dotB + "em"); root.setProperty("--dot-after", S.dotA + "em");
 
@@ -223,18 +279,24 @@
         form.ls_w.value = S.lsW; form.ls_w.disabled = S.lockW || trackingDriven;
         form.ols_w.value = (trackingDriven ? "= " : "") + (S.lsW + pitchLs + widthLs).toFixed(3) + "em";
         form.lock_d.value = S.lockD; form.f_d.value = S.fD; form.f_d.disabled = S.lockD !== "none"; setRange(form.w_d, S.fD, S.wD); form.w_d.disabled = S.lockD !== "none"; form.ow_d.value = S.wD;
+        form.lock_b.value = S.lockB; form.f_b.value = S.fB; form.f_b.disabled = S.lockB !== "none"; setRange(form.w_b, S.fB, S.wB); form.w_b.disabled = S.lockB !== "none"; form.ow_b.value = S.wB;
+        setRange(form.w_h, S.fB, S.wH); form.ow_h.value = S.wH; form.sample.checked = S.sample;
+        form.lock_c.value = S.lockC; form.f_c.value = S.fC; form.f_c.disabled = S.lockC !== "none"; setRange(form.w_c, S.fC, S.wC); form.w_c.disabled = S.lockC !== "none"; form.ow_c.value = S.wC;
         form.c_s.value = S.cS; form.c_d.value = S.cD; form.c_w.value = S.cW; form.c_bg.value = S.cBg;
         form.dotb.value = S.dotB; form.dota.value = S.dotA; form.odotb.value = S.dotB.toFixed(3) + "em"; form.odota.value = S.dotA.toFixed(3) + "em";
         form.xh.checked = S.xh; form.oxh.value = xscale === 1 ? "" : "×" + xscale.toFixed(3);
         form.wd.checked = S.wd; form.owd.value = widthLs === 0 ? "" : (widthLs > 0 ? "+" : "") + widthLs.toFixed(3) + "em";
         form.pitch.checked = S.pitch; form.pitch.disabled = S.wd; form.opitch.value = pitchLs === 0 ? "" : (pitchLs > 0 ? "+" : "") + pitchLs.toFixed(3) + "em";
-        const rec = [S.fS, S.fW, S.fD].includes("Recursive");
+        const rec = [S.fS, S.fW, S.fD, S.fB, S.fC].includes("Recursive");
         document.getElementById("recrow").hidden = document.getElementById("caslrow").hidden = !rec;
         form.mono.value = S.mono; form.casl.value = S.casl; form.omono.value = S.mono.toFixed(2); form.ocasl.value = S.casl.toFixed(2);
 
         // URL
         const p = new URLSearchParams({ sprue: `${S.fS}:${S.wS}`, works: `${S.fW}:${S.wW}`, lss: S.lsS.toFixed(3), lsw: S.lsW.toFixed(3), cs: S.cS, cd: S.cD, cw: S.cW, bg: S.cBg });
         p.set("dotlock", S.lockD); if (S.lockD === "none") p.set("dotfont", `${S.fD}:${S.wD}`);
+        p.set("bodylock", S.lockB); if (S.lockB === "none") p.set("body", `${S.fB}:${S.wB}`); p.set("heading", S.wH);
+        p.set("codelock", S.lockC); if (S.lockC === "none") p.set("code", `${S.fC}:${S.wC}`);
+        if (!S.sample) p.set("sample", "0");
         if (S.dotB) p.set("dotb", S.dotB.toFixed(3)); if (S.dotA) p.set("dota", S.dotA.toFixed(3));
         if (rec) { p.set("mono", S.mono.toFixed(2)); p.set("casl", S.casl.toFixed(2)); }
         if (!S.xh) p.set("xh", "0"); p.set("width", S.wd ? "1" : "0"); if (!S.pitch) p.set("pitch", "0");
@@ -246,6 +308,8 @@
       bind("f_s", (e) => { S.fS = e.value; }); bind("w_s", (e) => { S.wS = +e.value; }); bind("ls_s", (e) => { S.lsS = +e.value; });
       bind("lock_w", (e) => { S.lockW = e.checked; }); bind("f_w", (e) => { S.fW = e.value; }); bind("w_w", (e) => { S.wW = +e.value; }); bind("ls_w", (e) => { S.lsW = +e.value; });
       bind("lock_d", (e) => { S.lockD = e.value; }); bind("f_d", (e) => { S.fD = e.value; }); bind("w_d", (e) => { S.wD = +e.value; });
+      bind("lock_b", (e) => { S.lockB = e.value; }); bind("f_b", (e) => { S.fB = e.value; }); bind("w_b", (e) => { S.wB = +e.value; }); bind("w_h", (e) => { S.wH = +e.value; }); bind("sample", (e) => { S.sample = e.checked; });
+      bind("lock_c", (e) => { S.lockC = e.value; }); bind("f_c", (e) => { S.fC = e.value; }); bind("w_c", (e) => { S.wC = +e.value; });
       bind("c_s", (e) => { S.cS = e.value; }); bind("c_d", (e) => { S.cD = e.value; }); bind("c_w", (e) => { S.cW = e.value; }); bind("c_bg", (e) => { S.cBg = e.value; });
       bind("dotb", (e) => { S.dotB = +e.value; }); bind("dota", (e) => { S.dotA = +e.value; });
       bind("mono", (e) => { S.mono = +e.value; }); bind("casl", (e) => { S.casl = +e.value; });
