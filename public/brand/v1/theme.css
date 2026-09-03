@@ -1,0 +1,100 @@
+/* sprue.works brand theme, v1
+   https://sprue.works/brand/v1/theme.css
+
+   Design tokens only: CSS custom properties on :root, nothing that styles an
+   element. Every token is prefixed --sw- so it cannot collide with a consumer's
+   own variables. Usage, the variable list, and the versioning rule live in
+   brand/README.md in the sprue-works/website repository.
+
+   Versioning: additive changes (new tokens, adjusted values) land in v1; a
+   rename or removal ships as /brand/v2/theme.css. This file is served with a
+   long immutable Cache-Control, so a value change reaches repeat visitors only
+   once their cached copy expires. */
+
+/* ---- Typefaces -----------------------------------------------------------
+   The webfonts are pulled in here so a consumer needs nothing but the <link>.
+   Weights match the wordmark: Quicksand 700, Nunito 300, IBM Plex Mono 300. */
+@import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@700&family=IBM+Plex+Mono:wght@300&family=Nunito:wght@300&display=swap");
+
+:root {
+  /* Type stack. Body text is the platform UI face; the mono face is the
+     wordmark's "works" face so code and the mark share one voice. */
+  --sw-font-body: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --sw-font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Wordmark faces: sprue . works. Change a face here and in the @import
+     above; nothing else depends on it. */
+  --sw-font-sprue: "Quicksand", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --sw-weight-sprue: 700;
+  --sw-font-dot: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --sw-weight-dot: 300;
+  --sw-font-works: var(--sw-font-mono);
+  --sw-weight-works: 300;
+  /* Optical corrections measured with the picker (2026-09-03): the dot is
+     pulled 0.035em closer to "works"; "works" is scaled so its x-height
+     matches Quicksand's and tracked so the word is as wide as "sprue". */
+  --sw-dot-gap-after: -0.035em;
+  --sw-works-scale: 1.0368;
+  --sw-works-tracking: -0.0939em;
+
+  /* Type scale (rem) and leading. */
+  --sw-text-xs: 0.75rem;
+  --sw-text-sm: 0.875rem;
+  --sw-text-md: 1rem;
+  --sw-text-lg: 1.125rem;
+  --sw-text-xl: 1.25rem;
+  --sw-text-2xl: 1.5rem;
+  --sw-text-3xl: 2rem;
+  --sw-text-4xl: 2.5rem;
+  --sw-leading-tight: 1.2;
+  --sw-leading-normal: 1.5;
+
+  /* Spacing and radii. */
+  --sw-space-1: 0.25rem;
+  --sw-space-2: 0.5rem;
+  --sw-space-3: 0.75rem;
+  --sw-space-4: 1rem;
+  --sw-space-5: 1.5rem;
+  --sw-space-6: 2rem;
+  --sw-space-7: 3rem;
+  --sw-space-8: 4rem;
+  --sw-radius-sm: 2px;
+  --sw-radius-md: 4px;
+  --sw-radius-lg: 8px;
+  --sw-radius-full: 9999px;
+
+  /* ---- Palette (coolors.co/palette/c2571b-f97316-134e4a-f9dc5c-fff7ed-7fc6a4-904114-251818) */
+  --sw-bronze-spice: #c2571b;
+  --sw-pumpkin-spice: #f97316;
+  --sw-pine-teal: #134e4a;
+  --sw-royal-gold: #f9dc5c;
+  --sw-floral-white: #fff7ed;
+  --sw-muted-teal: #7fc6a4;
+  --sw-rust-brown: #904114;
+  --sw-coffee-bean: #251818;
+
+  /* Semantic colours, light scheme (default). */
+  --sw-bg: var(--sw-floral-white);
+  --sw-fg: var(--sw-coffee-bean);
+  --sw-muted: #7d6e69; /* fallback for browsers without color-mix() */
+  --sw-muted: color-mix(in srgb, var(--sw-coffee-bean) 60%, var(--sw-floral-white));
+  --sw-accent: var(--sw-rust-brown);
+  --sw-color-sprue: var(--sw-coffee-bean);
+  --sw-color-dot: var(--sw-pine-teal);
+  --sw-color-works: var(--sw-rust-brown);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --sw-bg: var(--sw-coffee-bean);
+    --sw-fg: var(--sw-floral-white);
+    --sw-muted: #9d938d;
+    --sw-muted: color-mix(in srgb, var(--sw-floral-white) 55%, var(--sw-coffee-bean));
+    --sw-accent: var(--sw-pumpkin-spice);
+    --sw-color-sprue: var(--sw-floral-white);
+    --sw-color-dot: var(--sw-muted-teal);
+    --sw-color-works: var(--sw-pumpkin-spice);
+    color-scheme: dark;
+  }
+}

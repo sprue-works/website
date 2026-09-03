@@ -1,0 +1,7 @@
+# Workers static-asset headers (Netlify-style). Brand assets are versioned by
+# path, so breaking changes bump /brand/vN/ and each version can be cached
+# forever. Same-origin isn't required for a <link>, but the open CORS header
+# lets consumers fetch() the tokens too.
+/brand/*
+  Cache-Control: public, max-age=31536000, immutable
+  Access-Control-Allow-Origin: *
