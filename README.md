@@ -63,7 +63,10 @@ one-line change described in the comment above the `<h1>` in
 Typefaces and colours were chosen with the interactive picker, which now lives
 at `public/picker/index.html`, served unlinked and `noindex`ed at
 https://sprue.works/picker (a tool, not a page of the site; it loads extra
-Google Fonts families from the same host the home page already uses). They are
+Google Fonts families from the same host the home page already uses). Below
+the wordmark it renders sample body copy and a code snippet in separately
+chosen Body and Code faces, so candidates can be judged as running text and
+not only as display type. They are
 set in one place: the "Typefaces" block at the
 top of `public/style.css`, together with the Google Fonts `<link>` in
 `public/index.html`. The page follows the OS colour scheme: Floral White
