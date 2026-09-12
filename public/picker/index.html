@@ -23,17 +23,20 @@
       .wordmark__works { color: var(--c-works); font-family: var(--f-works); font-weight: var(--w-works); font-variation-settings: var(--fvs-works, normal); font-size: calc(1em * var(--xscale, 1)); letter-spacing: calc(var(--ls-works, 0em) + var(--pitch-ls, 0em) + var(--width-ls, 0em)); }
       main { padding-bottom: calc(var(--panel-h, 24rem) + 2rem); } /* --panel-h is the measured height of #picker */
       /* Sample body copy (#8): judges the Body and Code roles as running text.
-         Kept visually secondary to the wordmark: measure-limited, 1rem, and
-         coloured from the same picker variables as the wordmark. */
-      #sample { max-width: 34rem; margin: 3rem auto 0; padding: 0 1rem; color: var(--c-sprue); font-family: var(--f-body); font-weight: var(--w-body); font-variation-settings: var(--fvs-body, normal); font-size: 1rem; line-height: 1.55; }
-      #sample h2 { font: inherit; font-weight: var(--w-heading); font-size: 1.4rem; line-height: 1.2; margin: 0 0 0.75rem; }
-      #sample p, #sample ul { margin: 0 0 0.9rem; }
-      #sample ul { padding-left: 1.25rem; }
+         Kept visually secondary to the wordmark: measure-limited and coloured
+         from the same picker variables as the wordmark. Sizes, leading, spacing
+         and radius are the theme's own tokens (/brand/v1/theme.css), so this
+         previews how body copy set in the theme would look; only the faces
+         come from the picker. */
+      #sample { max-width: 34rem; margin: var(--sw-space-7, 3rem) auto 0; padding: 0 var(--sw-space-4, 1rem); color: var(--c-sprue); font-family: var(--f-body); font-weight: var(--w-body); font-variation-settings: var(--fvs-body, normal); font-size: var(--sw-text-md, 1rem); line-height: var(--sw-leading-normal, 1.5); }
+      #sample h2 { font: inherit; font-weight: var(--w-heading); font-size: var(--sw-text-2xl, 1.5rem); line-height: var(--sw-leading-tight, 1.2); margin: 0 0 var(--sw-space-3, 0.75rem); }
+      #sample p, #sample ul { margin: 0 0 var(--sw-space-4, 1rem); }
+      #sample ul { padding-left: var(--sw-space-5, 1.5rem); }
       #sample a { color: var(--c-works); text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
       #sample code, #sample pre { font-family: var(--f-code); font-weight: var(--w-code); font-variation-settings: var(--fvs-code, normal); }
       #sample code { font-size: 0.92em; }
-      #sample pre { font-size: 0.85rem; line-height: 1.5; margin: 0 0 0.9rem; padding: 0.75rem 1rem; border-radius: 6px; overflow-x: auto; background: color-mix(in srgb, var(--c-sprue) 7%, transparent); }
-      #sample small { display: block; font-size: 0.78rem; color: color-mix(in srgb, var(--c-sprue) 65%, var(--sw-bg)); }
+      #sample pre { font-size: var(--sw-text-sm, 0.875rem); line-height: var(--sw-leading-normal, 1.5); margin: 0 0 var(--sw-space-4, 1rem); padding: var(--sw-space-3, 0.75rem) var(--sw-space-4, 1rem); border-radius: var(--sw-radius-md, 4px); overflow-x: auto; background: color-mix(in srgb, var(--c-sprue) 7%, transparent); }
+      #sample small { display: block; font-size: var(--sw-text-xs, 0.75rem); color: color-mix(in srgb, var(--c-sprue) 65%, var(--sw-bg)); }
       body.hide-sample #sample { display: none; }
       footer { display: none; }
       #picker {
@@ -79,7 +82,7 @@
         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis <a href="https://polyglot.sprue.works">nostrud exercitation</a> ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
         <ul>
           <li>Duis aute irure dolor in reprehenderit.</li>
-          <li>Voluptate velit esse cillum dolore, 16px / 34rem / 1.55.</li>
+          <li>Voluptate velit esse cillum dolore, 16px / 34rem / 1.5.</li>
           <li>Numerals: 0123456789, &pound;4.50, 3&times;7&nbsp;=&nbsp;21, 1998&ndash;2026.</li>
         </ul>
         <p>Excepteur sint occaecat <code>cupidatat non proident</code>; sunt in culpa qui officia. &ldquo;Quotes,&rdquo; semicolons; colons: and (parentheses) &amp; ampersands &mdash; deserunt mollit anim id est laborum.</p>
@@ -168,7 +171,12 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
         "Atkinson Hyperlegible Mono": ["Atkinson+Hyperlegible+Mono", 200, 800, "monospace"],
         "Sometype Mono":       ["Sometype+Mono", 400, 700, "monospace"],
         "Recursive":           ["Recursive", 300, 1000, "sans-serif", null, "wght,CASL,MONO@300..1000,0..1,0..1"],
+        // The theme's body face (--sw-font-body): the platform UI stack, nothing to load.
+        // Offered for the Body and Code roles only; the wordmark roles are measured on canvas
+        // and need a real webfont.
+        "System UI":           [null, 100, 900, "sans-serif"],
       };
+      const SYSTEM_UI = 'system-ui, -apple-system, "Segoe UI", sans-serif';
 
       const PALETTE = { "bronze-spice": ["Bronze Spice", "#c2571b"], "pumpkin-spice": ["Pumpkin Spice", "#f97316"], "pine-teal": ["Pine Teal", "#134e4a"], "royal-gold": ["Royal Gold", "#f9dc5c"], "floral-white": ["Floral White", "#fff7ed"], "muted-teal": ["Muted Teal", "#7fc6a4"], "rust-brown": ["Rust Brown", "#904114"], "coffee-bean": ["Coffee Bean", "#251818"] };
       const LEGACY_DOT = { accent: "pumpkin-spice", fg: "floral-white", rust: "bronze-spice", yellow: "royal-gold", mint: "muted-teal" };
@@ -177,7 +185,7 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
       const col = (k, d) => own(PALETTE, q.get(k)) ? q.get(k) : d;
 
       document.getElementById("gf").href = "https://fonts.googleapis.com/css2?" +
-        Object.values(FAMILIES).map(([gf, lo, hi, , fixed, axes]) =>
+        Object.values(FAMILIES).filter(([gf]) => gf).map(([gf, lo, hi, , fixed, axes]) =>
           "family=" + gf + ":" + (axes || ("wght@" + (fixed ? fixed.join(";") : lo + ".." + hi)))).join("&") + "&display=swap";
 
       const form = document.getElementById("picker");
@@ -193,20 +201,22 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
       // whichever scheme the OS prefers. Keep them in sync with those tokens.
       const dark = matchMedia("(prefers-color-scheme: dark)").matches;
       const S = {};
-      [S.fS, S.wS] = parse(q.get("sprue"), "Quicksand", 700);
-      [S.fW, S.wW] = parse(q.get("works"), "IBM Plex Mono", 300);
+      const webfont = (fam, d) => (FAMILIES[fam][0] ? fam : d);
+      [S.fS, S.wS] = parse(q.get("sprue"), "Quicksand", 700); S.fS = webfont(S.fS, "Quicksand");
+      [S.fW, S.wW] = parse(q.get("works"), "IBM Plex Mono", 300); S.fW = webfont(S.fW, "IBM Plex Mono");
       S.lockW = S.fW === S.fS && S.wW === S.wS;
       S.lockD = ["sprue", "works", "none"].includes(q.get("dotlock")) ? q.get("dotlock") : "none";
-      [S.fD, S.wD] = parse(q.get("dotfont"), "Nunito", 300);
+      [S.fD, S.wD] = parse(q.get("dotfont"), "Nunito", 300); S.fD = webfont(S.fD, "Nunito");
       S.lsS = num("lss", num("ls", 0)); S.lsW = num("lsw", num("ls", 0));
       S.cS = col("cs", dark ? "floral-white" : "coffee-bean"); S.cW = col("cw", dark ? "pumpkin-spice" : "rust-brown"); S.cBg = col("bg", dark ? "coffee-bean" : "floral-white");
       S.cD = col("cd", own(LEGACY_DOT, q.get("dot")) ? LEGACY_DOT[q.get("dot")] : (dark ? "muted-teal" : "pine-teal"));
       S.dotB = num("dotb", 0); S.dotA = num("dota", -0.035);
       S.mono = num("mono", 1); S.casl = num("casl", 1);
       // Body and Code roles (#8): the sample block follows these; each can
-      // track a wordmark role or carry its own face. Defaults are production.
+      // track a wordmark role or carry its own face. Defaults are production:
+      // --sw-font-body is the platform UI stack, --sw-font-mono is the works face.
       S.lockB = ["sprue", "works", "dot", "none"].includes(q.get("bodylock")) ? q.get("bodylock") : "none";
-      [S.fB, S.wB] = parse(q.get("body"), "Nunito", 400);
+      [S.fB, S.wB] = parse(q.get("body"), "System UI", 400);
       S.wH = num("heading", 700);
       S.lockC = ["sprue", "works", "dot", "body", "none"].includes(q.get("codelock")) ? q.get("codelock") : "works";
       [S.fC, S.wC] = parse(q.get("code"), "IBM Plex Mono", 300);
@@ -214,10 +224,10 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
       S.xh = q.get("xh") !== "0"; S.wd = q.has("width") ? q.get("width") === "1" : true; S.pitch = q.get("pitch") !== "0";
       let xscale = 1, dscale = 1, pitchLs = 0, widthLs = 0, measureTimer;
 
-      for (const sel of [form.f_s, form.f_w, form.f_d, form.f_b, form.f_c]) for (const name of Object.keys(FAMILIES)) sel.add(new Option(name, name));
+      for (const sel of [form.f_s, form.f_w, form.f_d, form.f_b, form.f_c]) for (const [name, [gf]] of Object.entries(FAMILIES)) if (gf || sel === form.f_b || sel === form.f_c) sel.add(new Option(name, name));
       for (const sel of form.querySelectorAll("select[data-palette]")) for (const [k, [name, hex]] of Object.entries(PALETTE)) { const o = new Option(`${name} ${hex}`, k); o.style.background = hex; o.style.color = k === "floral-white" || k === "royal-gold" || k === "muted-teal" ? "#251818" : "#fff7ed"; sel.add(o); }
       const snap = (fam, w) => { const [, lo, hi, , fixed] = FAMILIES[fam]; if (fixed) return fixed.reduce((a, b) => Math.abs(b - w) < Math.abs(a - w) ? b : a); return Math.min(hi, Math.max(lo, Math.round(w / 100) * 100)); };
-      const stack = (fam) => `"${fam}", system-ui, -apple-system, "Segoe UI", ${FAMILIES[fam][3]}`;
+      const stack = (fam) => FAMILIES[fam][0] ? `"${fam}", system-ui, -apple-system, "Segoe UI", ${FAMILIES[fam][3]}` : SYSTEM_UI;
       const fvs = (fam) => fam === "Recursive" ? `"MONO" ${S.mono}, "CASL" ${S.casl}` : "normal";
       const isMono = (fam) => FAMILIES[fam][3] === "monospace" || (fam === "Recursive" && S.mono >= 0.5);
 
