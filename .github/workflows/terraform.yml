@@ -53,7 +53,8 @@ jobs:
     name: Plan and apply
     # Only ever runs with the refs/heads/main ref (a push to main, or a manual
     # dispatch on main): the workload identity provider trusts exactly that
-    # subject, and this is the one job that receives CLOUDFLARE_API_TOKEN.
+    # subject, and this is the one job whose Terraform steps receive
+    # CLOUDFLARE_API_TOKEN.
     # Note that repository secrets are, by GitHub's model, readable by any
     # branch's workflow definition; this condition scopes when the job runs,
     # and the protected main branch plus organisation membership scope who can
@@ -72,8 +73,6 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    env:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -99,9 +98,15 @@ jobs:
           -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}"
           -backend-config="prefix=${{ vars.TF_STATE_PREFIX }}"
 
+      # The Cloudflare token is bound only to the two steps that run Terraform,
+      # not to the job, so checkout, Google auth, and setup-terraform never see it.
       - name: Create reviewed apply plan
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: terraform -chdir=terraform plan -input=false -no-color -out=apply.tfplan
 
       - name: Apply exact plan
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: terraform -chdir=terraform apply -input=false -auto-approve apply.tfplan
 

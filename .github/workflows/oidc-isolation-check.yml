@@ -4,7 +4,8 @@ name: OIDC isolation check
 # rejects every ref of this repository except refs/heads/main. Dispatch it from
 # a branch other than main: the run passes only when Google's STS endpoint
 # answers the token exchange with the specific attribute-condition rejection.
-# Dispatched from main it fails on purpose, since main is meant to be accepted.
+# Dispatched from main the job is skipped, since main is meant to be accepted
+# and the real apply job already proves that path.
 #
 # This workflow deliberately references no secrets and never runs Terraform.
 
