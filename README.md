@@ -71,13 +71,14 @@ hand.
   There is no routine local access: a laptop cannot `init` against the bucket
   without the temporary break-glass binding described under "Migrating
   state". To confirm the isolation, dispatch the workflow from a branch other
-  than `main`: the apply job must fail at "Authenticate to Google Cloud" with
-  "rejected by the attribute condition".
+  than `main`: that runs the secretless "Confirm non-main refs are rejected"
+  job, which passes only when the provider rejects the branch's subject. The
+  apply job, the only one holding the Cloudflare token, never runs off `main`.
 - **Workflow.** `.github/workflows/terraform.yml` runs on changes under
   `terraform/`. Pull requests get `fmt -check`, `init -backend=false`, and
   `validate` only; a push to `main` that touches those paths, or a manual
-  dispatch, additionally runs the apply job (which authenticates only from
-  `main`, see above). The
+  dispatch on `main`, additionally plans and applies; a manual dispatch from
+  any other branch runs the identity check instead. The
   Cloudflare provider reads the repository secret `CLOUDFLARE_API_TOKEN`,
   which needs `Zone:Read` and `Zone → Dynamic Redirect:Edit` on the
   sprue.works zone.
