@@ -70,15 +70,21 @@ hand.
   job must not name a GitHub Environment, which would change the subject.
   There is no routine local access: a laptop cannot `init` against the bucket
   without the temporary break-glass binding described under "Migrating
-  state". To confirm the isolation, dispatch the workflow from a branch other
-  than `main`: that runs the secretless "Confirm non-main refs are rejected"
-  job, which passes only when the provider rejects the branch's subject. The
-  apply job, the only one holding the Cloudflare token, never runs off `main`.
+  state". To confirm the isolation, dispatch the separate "OIDC isolation
+  check" workflow (`.github/workflows/oidc-isolation-check.yml`) from a branch
+  other than `main`. It references no secrets, exchanges that branch's OIDC
+  token with Google's STS endpoint directly, and passes only on the specific
+  "rejected by the attribute condition" 403; an accepted token fails as an
+  incident, and any other response fails as a configuration error.
 - **Workflow.** `.github/workflows/terraform.yml` runs on changes under
   `terraform/`. Pull requests get `fmt -check`, `init -backend=false`, and
   `validate` only; a push to `main` that touches those paths, or a manual
-  dispatch on `main`, additionally plans and applies; a manual dispatch from
-  any other branch runs the identity check instead. The
+  dispatch on `main`, additionally plans and applies. The apply job is the
+  only place the Cloudflare token appears. Repository secrets are readable by
+  any branch's workflow definition in GitHub's model; an environment secret
+  would be stronger, but naming an environment changes the OIDC subject the
+  provider trusts, so the boundary here is the protected `main` branch and
+  who may push branches to this repository at all. The
   Cloudflare provider reads the repository secret `CLOUDFLARE_API_TOKEN`,
   which needs `Zone:Read` and `Zone → Dynamic Redirect:Edit` on the
   sprue.works zone.
