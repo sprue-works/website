@@ -1,27 +1,8 @@
-/* The tokens (typefaces, palette, light/dark scheme) come from the hosted
-   brand theme, linked before this file in index.html:
+/* Composition only. Every colour and typeface is a --sw-* token from the
+   hosted brand theme, linked before this file in index.html:
      /brand/v1/theme.css  (source: public/brand/v1/theme.css, docs: brand/README.md)
-   This file only composes them. Every var() carries a fallback so the page
-   degrades to readable system styling if the theme fails to load. */
-:root {
-  --bg: var(--sw-bg, #fff7ed);
-  --fg: var(--sw-fg, #251818);
-  --muted: var(--sw-muted, #7d6e69);
-  --accent: var(--sw-accent, #904114);
-  --color-sprue: var(--sw-color-sprue, #251818);
-  --color-dot: var(--sw-color-dot, #134e4a);
-  --color-works: var(--sw-color-works, #904114);
-  --font-body: var(--sw-font-body, system-ui, sans-serif);
-  --font-sprue: var(--sw-font-sprue, system-ui, sans-serif);
-  --weight-sprue: var(--sw-weight-sprue, 700);
-  --font-dot: var(--sw-font-dot, system-ui, sans-serif);
-  --weight-dot: var(--sw-weight-dot, 300);
-  --dot-gap-after: var(--sw-dot-gap-after, 0em);
-  --font-works: var(--sw-font-works, ui-monospace, monospace);
-  --weight-works: var(--sw-weight-works, 300);
-  --works-scale: var(--sw-works-scale, 1);
-  --works-tracking: var(--sw-works-tracking, 0em);
-}
+   No fallbacks here on purpose: the theme is same-origin, so if it fails to
+   load this file has failed too. External consumers add their own. */
 
 *,
 *::before,
@@ -39,9 +20,9 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
-  background: var(--bg);
-  color: var(--fg);
-  font-family: var(--font-body);
+  background: var(--sw-bg);
+  color: var(--sw-fg);
+  font-family: var(--sw-font-body);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -65,24 +46,24 @@ main {
 }
 
 .wordmark__sprue {
-  color: var(--color-sprue);
-  font-family: var(--font-sprue);
-  font-weight: var(--weight-sprue);
+  color: var(--sw-color-sprue);
+  font-family: var(--sw-font-sprue);
+  font-weight: var(--sw-weight-sprue);
 }
 
 .wordmark__dot {
-  color: var(--color-dot);
-  font-family: var(--font-dot);
-  font-weight: var(--weight-dot);
-  margin-right: var(--dot-gap-after);
+  color: var(--sw-color-dot);
+  font-family: var(--sw-font-dot);
+  font-weight: var(--sw-weight-dot);
+  margin-right: var(--sw-dot-gap-after);
 }
 
 .wordmark__works {
-  color: var(--color-works);
-  font-family: var(--font-works);
-  font-weight: var(--weight-works);
-  font-size: calc(1em * var(--works-scale));
-  letter-spacing: var(--works-tracking);
+  color: var(--sw-color-works);
+  font-family: var(--sw-font-works);
+  font-weight: var(--sw-weight-works);
+  font-size: calc(1em * var(--sw-works-scale));
+  letter-spacing: var(--sw-works-tracking);
 }
 
 /* Sizing for the eventual SVG mark (see the comment in index.html). */
@@ -101,22 +82,22 @@ footer {
 }
 
 footer a {
-  color: var(--muted);
+  color: var(--sw-muted);
   text-decoration: underline;
   text-decoration-color: currentColor; /* fallback for browsers without color-mix() */
-  text-decoration-color: color-mix(in srgb, var(--muted) 50%, transparent);
+  text-decoration-color: color-mix(in srgb, var(--sw-muted) 50%, transparent);
   text-decoration-thickness: 1px;
   text-underline-offset: 0.2em;
 }
 
 footer a:hover,
 footer a:focus-visible {
-  color: var(--fg);
+  color: var(--sw-fg);
   text-decoration-color: currentColor;
 }
 
 footer a:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--sw-accent);
   outline-offset: 4px;
   border-radius: 2px;
 }
