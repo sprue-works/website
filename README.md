@@ -73,9 +73,10 @@ hand.
   state". To confirm the isolation, dispatch the separate "OIDC isolation
   check" workflow (`.github/workflows/oidc-isolation-check.yml`) from a branch
   other than `main`. It references no secrets, exchanges that branch's OIDC
-  token with Google's STS endpoint directly, and passes only on the specific
-  "rejected by the attribute condition" 403; an accepted token fails as an
-  incident, and any other response fails as a configuration error.
+  token with Google's STS endpoint directly, and passes only when the 400 or
+  403 response body says "rejected by the attribute condition"; an accepted
+  token fails as an incident, and any other response fails as a configuration
+  error.
 - **Workflow.** `.github/workflows/terraform.yml` runs on changes under
   `terraform/`. Pull requests get `fmt -check`, `init -backend=false`, and
   `validate` only; a push to `main` that touches those paths, or a manual
