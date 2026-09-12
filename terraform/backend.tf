@@ -4,9 +4,11 @@
 # from the repository variables TF_STATE_BUCKET and TF_STATE_PREFIX, so the
 # values live in one place (see .github/workflows/terraform.yml and README.md).
 #
-# Only a workflow job running on a push to main can authenticate to the bucket:
-# the workload identity provider trusts exactly this repository's
-# refs/heads/main OIDC subject. There is no local or pull-request access.
+# Only that workflow's apply job, running with this repository's
+# refs/heads/main ref (a push to main, or a manual dispatch on main), can
+# authenticate to the bucket: the workload identity provider trusts exactly
+# that OIDC subject. Pull requests and other branches are rejected, and there
+# is no routine local access.
 terraform {
   backend "gcs" {}
 }

@@ -51,11 +51,14 @@ jobs:
 
   apply:
     name: Plan and apply
-    # The provider trusts exactly this repository's refs/heads/main ref
-    # subject, so only a push to main (or a manual run on main) can
-    # authenticate. Do NOT add `environment:` to this job: it would change the
-    # subject to ...:environment:<name>, which the provider rejects.
-    if: "github.ref == 'refs/heads/main'"
+    # Runs on pushes to main and on every manual dispatch. The workload
+    # identity provider trusts exactly this repository's refs/heads/main ref
+    # subject, so a push to main (or a dispatch on main) authenticates, while a
+    # dispatch from any other branch is rejected at the auth step before it can
+    # read state. That rejection is the isolation check the README describes.
+    # Do NOT add `environment:` to this job: it would change the subject to
+    # ...:environment:<name>, which the provider rejects.
+    if: "github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'"
     needs: validate
     runs-on: ubuntu-latest
     concurrency:

@@ -65,21 +65,29 @@ hand.
 - **Identity.** The workflow authenticates to Google with GitHub OIDC through
   the workload identity provider named in the repository variable
   `GCP_WORKLOAD_IDENTITY_PROVIDER`. The provider trusts exactly this
-  repository's `refs/heads/main` ref subject, so only a job on a push to
-  `main` (or a `workflow_dispatch` run on `main`) can reach the bucket. The
+  repository's `refs/heads/main` ref subject, so only the apply job on a push
+  to `main` (or a `workflow_dispatch` run on `main`) can reach the bucket. The
   job must not name a GitHub Environment, which would change the subject.
-  There is no local access: a laptop cannot `init` against the bucket.
+  There is no routine local access: a laptop cannot `init` against the bucket
+  without the temporary break-glass binding described under "Migrating
+  state". To confirm the isolation, dispatch the workflow from a branch other
+  than `main`: the apply job must fail at "Authenticate to Google Cloud" with
+  "rejected by the attribute condition".
 - **Workflow.** `.github/workflows/terraform.yml` runs on changes under
   `terraform/`. Pull requests get `fmt -check`, `init -backend=false`, and
-  `validate` only; a push to `main` additionally plans and applies. The
+  `validate` only; a push to `main` that touches those paths, or a manual
+  dispatch, additionally runs the apply job (which authenticates only from
+  `main`, see above). The
   Cloudflare provider reads the repository secret `CLOUDFLARE_API_TOKEN`,
   which needs `Zone:Read` and `Zone → Dynamic Redirect:Edit` on the
   sprue.works zone.
 - **Import.** The redirect ruleset was created through the Cloudflare API
   before the Terraform existed. An `import` block in `terraform/main.tf`
-  adopts it on the first apply from `main`; the block is a no-op afterwards
-  and stays as a record. `terraform state list` in that run should show
-  `cloudflare_ruleset.redirects` and the plan should report no changes.
+  adopts it on the first apply from `main`. That first plan is expected to
+  read `1 to import, 0 to add, 0 to change, 0 to destroy`; an in-place change
+  there means the live rule and the HCL have drifted, so stop and reconcile.
+  Every later plan should report no changes. The block is a no-op once the
+  resource is in state and stays as a record of where it came from.
 - **Local loop.** `terraform -chdir=terraform fmt -recursive`, then
   `terraform -chdir=terraform init -backend=false && terraform -chdir=terraform
   validate`. Plans need the bucket, so run them from `main` via the workflow.
