@@ -30,10 +30,8 @@ this GitHub repo.
 - **www redirect:** a zone-level Redirect Rule ("www to apex") sends
   `www.sprue.works/*` to `https://sprue.works/*` with a 301. It is declared
   in `terraform/` (Workers static-asset `_redirects` files accept only
-  relative source paths, so a host-based redirect has to live at the zone).
-  Apply with `CLOUDFLARE_API_TOKEN` set; the header comment in
-  `terraform/main.tf` has the one-time `terraform import` for the ruleset
-  that already exists.
+  relative source paths, so a host-based redirect has to live at the zone)
+  and applied from `main` by GitHub Actions; see [Terraform](#terraform).
 - **Build settings:** no build command. Deploy commands are the Workers Builds
   defaults.
 
@@ -52,6 +50,53 @@ this GitHub repo.
 
 You can also deploy from a laptop with `npx wrangler login && npx wrangler
 deploy`; Workers Builds is what keeps `main` and the branch previews in sync.
+
+## Terraform
+
+`terraform/` holds the zone-level Cloudflare configuration that cannot live in
+`wrangler.jsonc` (today, the www redirect ruleset). Nothing in it is applied by
+hand.
+
+- **State** lives in the GCS bucket `sprue-works-website-tfstate` under the
+  prefix `terraform/website/cloudflare`, provisioned by
+  sprue-works/infrastructure#3. `terraform/backend.tf` declares an empty `gcs`
+  backend; the bucket and prefix are passed at `init` from the repository
+  variables `TF_STATE_BUCKET` and `TF_STATE_PREFIX`.
+- **Identity.** The workflow authenticates to Google with GitHub OIDC through
+  the workload identity provider named in the repository variable
+  `GCP_WORKLOAD_IDENTITY_PROVIDER`. The provider trusts exactly this
+  repository's `refs/heads/main` ref subject, so only a job on a push to
+  `main` (or a `workflow_dispatch` run on `main`) can reach the bucket. The
+  job must not name a GitHub Environment, which would change the subject.
+  There is no local access: a laptop cannot `init` against the bucket.
+- **Workflow.** `.github/workflows/terraform.yml` runs on changes under
+  `terraform/`. Pull requests get `fmt -check`, `init -backend=false`, and
+  `validate` only; a push to `main` additionally plans and applies. The
+  Cloudflare provider reads the repository secret `CLOUDFLARE_API_TOKEN`,
+  which needs `Zone:Read` and `Zone → Dynamic Redirect:Edit` on the
+  sprue.works zone.
+- **Import.** The redirect ruleset was created through the Cloudflare API
+  before the Terraform existed. An `import` block in `terraform/main.tf`
+  adopts it on the first apply from `main`; the block is a no-op afterwards
+  and stays as a record. `terraform state list` in that run should show
+  `cloudflare_ruleset.redirects` and the plan should report no changes.
+- **Local loop.** `terraform -chdir=terraform fmt -recursive`, then
+  `terraform -chdir=terraform init -backend=false && terraform -chdir=terraform
+  validate`. Plans need the bucket, so run them from `main` via the workflow.
+- **Migrating state.** This repository never had local state to migrate (the
+  ruleset was left unimported until the bucket existed). If a local
+  `terraform.tfstate` ever needs moving, an operator with a temporary
+  break-glass binding on the bucket runs, from a checkout of `main`:
+
+  ```sh
+  terraform -chdir=terraform init -migrate-state \
+    -backend-config="bucket=sprue-works-website-tfstate" \
+    -backend-config="prefix=terraform/website/cloudflare"
+  ```
+
+  and deletes the local file afterwards. The consumer onboarding runbook in
+  sprue-works/infrastructure (`docs/consumers.md`) covers the break-glass
+  binding and the isolation checks.
 
 ## Wordmark, typefaces, and colours
 
