@@ -51,14 +51,14 @@ jobs:
 
   apply:
     name: Plan and apply
-    # Runs on pushes to main and on every manual dispatch. The workload
-    # identity provider trusts exactly this repository's refs/heads/main ref
-    # subject, so a push to main (or a dispatch on main) authenticates, while a
-    # dispatch from any other branch is rejected at the auth step before it can
-    # read state. That rejection is the isolation check the README describes.
+    # Only ever runs with the refs/heads/main ref (a push to main, or a manual
+    # dispatch on main): the workload identity provider trusts exactly that
+    # subject, and this is the one job that receives CLOUDFLARE_API_TOKEN, so
+    # branch-controlled workflow code must never reach it. Non-main dispatches
+    # go to the secretless identity-check job below instead.
     # Do NOT add `environment:` to this job: it would change the subject to
     # ...:environment:<name>, which the provider rejects.
-    if: "github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'"
+    if: "github.ref == 'refs/heads/main'"
     needs: validate
     runs-on: ubuntu-latest
     concurrency:
@@ -99,3 +99,36 @@ jobs:
 
       - name: Apply exact plan
         run: terraform -chdir=terraform apply -input=false -auto-approve apply.tfplan
+
+  identity-check:
+    name: Confirm non-main refs are rejected
+    # Isolation check, runnable by dispatching this workflow from any branch
+    # other than main. The job carries no secrets and never touches Terraform;
+    # it only asks Google for a token with this branch's OIDC subject and
+    # passes when the provider rejects it. A green run from a non-main branch
+    # means the trust is scoped as intended; a red run means the provider
+    # accepted a ref it should not have.
+    if: "github.event_name == 'workflow_dispatch' && github.ref != 'refs/heads/main'"
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Attempt to authenticate to Google Cloud (expected to fail)
+        id: auth
+        continue-on-error: true
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          create_credentials_file: false
+
+      - name: Fail if the provider accepted a non-main ref
+        if: steps.auth.outcome == 'success'
+        run: |
+          echo "::error::The workload identity provider accepted the ${GITHUB_REF} subject. Only refs/heads/main should be trusted; treat this as an incident for the state bucket."
+          exit 1
+
+      - name: Report the expected rejection
+        if: steps.auth.outcome != 'success'
+        run: echo "The provider rejected the ${GITHUB_REF} subject, as intended."
