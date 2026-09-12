@@ -68,6 +68,10 @@ Type:
 | `--sw-text-xs` … `--sw-text-4xl` | 0.75 / 0.875 / 1 / 1.125 / 1.25 / 1.5 / 2 / 2.5 rem |
 | `--sw-leading-tight` / `--sw-leading-normal` | 1.2 / 1.5 |
 
+Swapping a typeface is a two-part change in `theme.css`: the `--sw-font-*`
+token and the family list in the `@import` at the top, since the token alone
+does not load a webfont.
+
 Spacing `--sw-space-1` … `--sw-space-8` (0.25, 0.5, 0.75, 1, 1.5, 2, 3, 4 rem)
 and radii `--sw-radius-sm` / `-md` / `-lg` / `-full` (2px, 4px, 8px, pill).
 
