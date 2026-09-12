@@ -53,11 +53,14 @@ jobs:
             200)
               echo "::error::The provider accepted the ${GITHUB_REF} subject. Only refs/heads/main should be trusted; treat this as an incident for the state bucket."
               exit 1 ;;
-            403)
+            400|403)
+              # STS has reported attribute-condition rejections as both
+              # 400 invalid_grant and 403 unauthorized_client; the message is
+              # the stable part, so it is the assertion.
               if grep -q 'rejected by the attribute condition' sts.json; then
-                echo "The provider rejected the ${GITHUB_REF} subject by its attribute condition, as intended."
+                echo "The provider rejected the ${GITHUB_REF} subject by its attribute condition (HTTP ${status}), as intended."
               else
-                echo "::error::STS returned 403 for a different reason than the attribute condition:"
+                echo "::error::STS returned ${status} for a different reason than the attribute condition:"
                 cat sts.json
                 exit 2
               fi ;;
