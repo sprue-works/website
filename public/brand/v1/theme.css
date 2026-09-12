@@ -78,8 +78,7 @@
   /* Semantic colours, light scheme (default). */
   --sw-bg: var(--sw-floral-white);
   --sw-fg: var(--sw-coffee-bean);
-  --sw-muted: #7d6e69; /* fallback for browsers without color-mix() */
-  --sw-muted: color-mix(in srgb, var(--sw-coffee-bean) 60%, var(--sw-floral-white));
+  --sw-muted: #7d6e69; /* refined via color-mix() in the @supports block below */
   --sw-accent: var(--sw-rust-brown);
   --sw-color-sprue: var(--sw-coffee-bean);
   --sw-color-dot: var(--sw-pine-teal);
@@ -92,11 +91,24 @@
     --sw-bg: var(--sw-coffee-bean);
     --sw-fg: var(--sw-floral-white);
     --sw-muted: #9d938d;
-    --sw-muted: color-mix(in srgb, var(--sw-floral-white) 55%, var(--sw-coffee-bean));
     --sw-accent: var(--sw-pumpkin-spice);
     --sw-color-sprue: var(--sw-floral-white);
     --sw-color-dot: var(--sw-muted-teal);
     --sw-color-works: var(--sw-pumpkin-spice);
     color-scheme: dark;
+  }
+}
+
+/* A custom property accepts any tokens, so a second declaration is not a
+   fallback for it: the color-mix() value would win even where color-mix() is
+   unsupported and var(--sw-muted) would then be invalid. Gate the mix. */
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  :root {
+    --sw-muted: color-mix(in srgb, var(--sw-coffee-bean) 60%, var(--sw-floral-white));
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --sw-muted: color-mix(in srgb, var(--sw-floral-white) 55%, var(--sw-coffee-bean));
+    }
   }
 }
