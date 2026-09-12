@@ -7,8 +7,9 @@
 # wrangler.jsonc and created by `wrangler deploy`; Workers Builds (the GitHub
 # connection) has no Terraform resource and is configured in the dashboard.
 #
-# State lives in the GCS bucket configured in backend.tf, and every push to
-# main plans and applies through .github/workflows/terraform.yml using
+# State lives in the GCS bucket configured in backend.tf. Pushes to main that
+# touch terraform/ (or the workflow itself), and manual dispatches on main,
+# plan and apply through .github/workflows/terraform.yml using
 # CLOUDFLARE_API_TOKEN (Zone:Read + Zone Rulesets (Dynamic Redirect):Edit)
 # from the repository secret of that name. Nothing here is applied by hand;
 # the README's "Terraform" section has the local fmt/validate loop.
