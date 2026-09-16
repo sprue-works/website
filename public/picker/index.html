@@ -277,7 +277,7 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
         // tracking, so its five advances stay even. It owns the works scale, so it overrides x-height.
         const differs = S.fS !== S.fW || S.wS !== S.wW || S.fS === "Recursive";
         const matchW = S.wd && (differs || S.lsS !== S.lsW);
-        const pitchMode = matchW && isMono(S.fW) && S.wdBy === "pitch";
+        const pitchMode = S.wd && isMono(S.fW) && S.wdBy === "pitch";
         document.getElementById("wdbyrow").hidden = !(S.wd && isMono(S.fW));
 
         // x-height: scale works so its lowercase x matches sprue's; the dot follows whichever side it locks to
@@ -306,7 +306,7 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
         // controls
         const setRange = (el, fam, w) => { el.min = FAMILIES[fam][1]; el.max = FAMILIES[fam][2]; el.value = w; };
         form.f_s.value = S.fS; setRange(form.w_s, S.fS, S.wS); form.ow_s.value = S.wS; form.ls_s.value = S.lsS; form.ols_s.value = S.lsS.toFixed(3) + "em";
-        form.lock_w.checked = S.lockW; form.f_w.value = S.fW; form.f_w.disabled = S.lockW; setRange(form.w_w, S.fW, S.wW); form.w_w.disabled = S.lockW; form.ow_w.value = S.wW; const trackingDriven = (S.wd && !pitchMode) || (S.pitch && bothMono);
+        form.lock_w.checked = S.lockW; form.f_w.value = S.fW; form.f_w.disabled = S.lockW; setRange(form.w_w, S.fW, S.wW); form.w_w.disabled = S.lockW; form.ow_w.value = S.wW; const trackingDriven = !pitchMode && (S.wd || (S.pitch && bothMono)); // pitch mode leaves tracking to the user
         form.ls_w.value = S.lsW; form.ls_w.disabled = S.lockW || trackingDriven;
         form.ols_w.value = (trackingDriven ? "= " : "") + (S.lsW + pitchLs + widthLs).toFixed(3) + "em";
         form.lock_d.value = S.lockD; form.f_d.value = S.fD; form.f_d.disabled = S.lockD !== "none"; setRange(form.w_d, S.fD, S.wD); form.w_d.disabled = S.lockD !== "none"; form.ow_d.value = S.wD;
