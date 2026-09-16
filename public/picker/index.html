@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link id="gf" rel="stylesheet" href="" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
     <link rel="stylesheet" href="/brand/v1/theme.css" />
     <link rel="stylesheet" href="/brand/v1/wordmark.css" />
     <link rel="stylesheet" href="/style.css" />
@@ -154,7 +155,9 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
     </form>
 
     <script>
-      // family -> [googleFontsName, minWeight, maxWeight, generic, fixedWeights?, axisSpec?]
+      // family -> [source, minWeight, maxWeight, generic, fixedWeights?, axisSpec?]
+      // source is the Google Fonts family name, or "@<slug>" for a Fontsource
+      // package served from jsDelivr (faces Google Fonts doesn't carry).
       const FAMILIES = {
         "Nunito":              ["Nunito", 200, 1000, "sans-serif"],
         "Quicksand":           ["Quicksand", 300, 700, "sans-serif"],
@@ -178,6 +181,10 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
         "Spline Sans Mono":    ["Spline+Sans+Mono", 300, 700, "monospace"],
         "Atkinson Hyperlegible Mono": ["Atkinson+Hyperlegible+Mono", 200, 800, "monospace"],
         "Sometype Mono":       ["Sometype+Mono", 400, 700, "monospace"],
+        // Iosevka (OFL, github.com/be5invis/Iosevka): a stroke-built mono whose
+        // widths are drawn, not scaled. Fontsource ships the normal width only;
+        // the Extended cuts would need self-hosting from the release zips.
+        "Iosevka":             ["@iosevka", 100, 900, "monospace"],
         "Recursive":           ["Recursive", 300, 1000, "sans-serif", null, "wght,CASL,MONO@300..1000,0..1,0..1"],
         // The theme's body face (--sw-font-body): the platform UI stack, nothing to load.
         // Offered for the Body and Code roles only; the wordmark roles are measured on canvas
@@ -192,9 +199,15 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
       const own = (o, k) => Object.hasOwn(o, k);
       const col = (k, d) => own(PALETTE, q.get(k)) ? q.get(k) : d;
 
+      const fontsource = (src) => src && src.startsWith("@");
       document.getElementById("gf").href = "https://fonts.googleapis.com/css2?" +
-        Object.values(FAMILIES).filter(([gf]) => gf).map(([gf, lo, hi, , fixed, axes]) =>
+        Object.values(FAMILIES).filter(([gf]) => gf && !fontsource(gf)).map(([gf, lo, hi, , fixed, axes]) =>
           "family=" + gf + ":" + (axes || ("wght@" + (fixed ? fixed.join(";") : lo + ".." + hi)))).join("&") + "&display=swap";
+      // Fontsource publishes one stylesheet per weight; each declares the family under its own name.
+      for (const [src, lo, hi, , fixed] of Object.values(FAMILIES)) if (fontsource(src))
+        for (const w of fixed || Array.from({ length: (hi - lo) / 100 + 1 }, (_, i) => lo + i * 100)) {
+          const l = document.createElement("link"); l.rel = "stylesheet"; l.href = `https://cdn.jsdelivr.net/npm/@fontsource/${src.slice(1)}@5/${w}.css`; document.head.appendChild(l);
+        }
 
       const form = document.getElementById("picker");
       const root = document.documentElement.style;
