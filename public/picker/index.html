@@ -409,9 +409,13 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
         // controls
         const setRange = (el, fam, w) => { el.min = FAMILIES[fam][1]; el.max = FAMILIES[fam][2]; el.value = w; };
         form.f_s.value = S.fS; setRange(form.w_s, S.fS, S.wS); form.ow_s.value = S.wS; form.ls_s.value = S.lsS; form.ols_s.value = S.lsS.toFixed(3) + "em";
-        form.lock_w.checked = S.lockW; form.f_w.value = S.fW; form.f_w.disabled = S.lockW; setRange(form.w_w, S.fW, S.wW); form.w_w.disabled = S.lockW; form.ow_w.value = S.wW; const trackingDriven = !pitchMode && (S.wd || (S.pitch && bothMono)); // pitch mode leaves tracking to the user
+        form.lock_w.checked = S.lockW; form.f_w.value = S.fW; form.f_w.disabled = S.lockW; setRange(form.w_w, S.fW, S.wW); form.w_w.disabled = S.lockW; form.ow_w.value = S.wW; // The pitch and axis modes solve size or width, so the user's tracking stays theirs
+        // and is simply part of what gets measured, as in the letter-spacing mode it is not.
+        const trackingDriven = !pitchMode && !axisMode && (S.wd || (S.pitch && bothMono));
         form.ls_w.value = S.lsW; form.ls_w.disabled = S.lockW || trackingDriven;
-        form.ols_w.value = (trackingDriven ? "= " : "") + (S.lsW + pitchLs + widthLs).toFixed(3) + "em";
+        // "=" marks a number the picker chose. In axis mode that is only the remainder
+        // it had to add once the axis hit an end.
+        form.ols_w.value = (trackingDriven || (axisMode && widthLs !== 0) ? "= " : "") + (S.lsW + pitchLs + widthLs).toFixed(3) + "em";
         form.lock_d.value = S.lockD; form.f_d.value = S.fD; form.f_d.disabled = S.lockD !== "none"; setRange(form.w_d, S.fD, S.wD); form.w_d.disabled = S.lockD !== "none"; form.ow_d.value = S.wD;
         form.lock_b.value = S.lockB; form.f_b.value = S.fB; form.f_b.disabled = S.lockB !== "none"; setRange(form.w_b, S.fB, S.wB); form.w_b.disabled = S.lockB !== "none"; form.ow_b.value = S.wB;
         setRange(form.w_h, S.fB, S.wH); form.ow_h.value = S.wH; form.sample.checked = S.sample;
