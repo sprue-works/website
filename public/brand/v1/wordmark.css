@@ -40,6 +40,14 @@
      rather than left to apply to two of the three spans. */
   white-space: nowrap;
   letter-spacing: normal;
+  /* The mark is a latin name and is set left to right wherever it is embedded.
+     Its own letters are strong LTR, so bidi already orders them correctly in
+     an RTL page; this states it rather than relying on it, and the isolate
+     keeps the mark a single unit in the surrounding bidi run, so neutrals
+     either side of it resolve against the consumer's text and not against the
+     mark's. It also fixes what "right" means for the margin below. */
+  direction: ltr;
+  unicode-bidi: isolate;
 }
 
 .sw-wordmark__sprue {
