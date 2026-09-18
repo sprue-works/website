@@ -1,8 +1,11 @@
 /* Composition only. Every colour and typeface is a --sw-* token from the
-   hosted brand theme, linked before this file in index.html:
-     /brand/v1/theme.css  (source: public/brand/v1/theme.css, docs: brand/README.md)
-   No fallbacks here on purpose: the theme is same-origin, so if it fails to
-   load this file has failed too. External consumers add their own. */
+   hosted brand theme, and the wordmark itself is the hosted composition of
+   those tokens; both are linked before this file in index.html:
+     /brand/v1/theme.css     (source: public/brand/v1/theme.css)
+     /brand/v1/wordmark.css  (source: public/brand/v1/wordmark.css)
+   Docs for both: brand/README.md. No fallbacks here on purpose: those files
+   are same-origin, so if they fail to load this one has failed too. External
+   consumers add their own. */
 
 *,
 *::before,
@@ -34,36 +37,17 @@ main {
   padding: 2rem 1rem;
 }
 
-/* ---- Wordmark ---- */
+/* ---- Wordmark ----
+   The mark itself — faces, weights, dot gap, works scale and tracking, and
+   the --brand colours — is .sw-wordmark in /brand/v1/wordmark.css, which the
+   <h1> carries alongside the class below. All that is left here is this
+   page's display treatment of it: how large it is and where it sits. */
 .wordmark {
   margin: 0;
   /* ~9vw between 2.75rem and 8rem so it stays large on phones and desktops. */
   font-size: clamp(2.75rem, 9vw, 8rem);
   line-height: 1;
-  letter-spacing: 0;
   text-align: center;
-  white-space: nowrap;
-}
-
-.wordmark__sprue {
-  color: var(--sw-color-sprue);
-  font-family: var(--sw-font-sprue);
-  font-weight: var(--sw-weight-sprue);
-}
-
-.wordmark__dot {
-  color: var(--sw-color-dot);
-  font-family: var(--sw-font-dot);
-  font-weight: var(--sw-weight-dot);
-  margin-right: var(--sw-dot-gap-after);
-}
-
-.wordmark__works {
-  color: var(--sw-color-works);
-  font-family: var(--sw-font-works);
-  font-weight: var(--sw-weight-works);
-  font-size: calc(1em * var(--sw-works-scale));
-  letter-spacing: var(--sw-works-tracking);
 }
 
 /* Sizing for the eventual SVG mark (see the comment in index.html). */
