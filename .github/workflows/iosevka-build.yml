@@ -35,6 +35,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: iosevka-build-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -44,22 +48,26 @@ jobs:
       IOSEVKA_REF: ${{ inputs.iosevka_ref || '' }}
       WEIGHTS: ${{ inputs.weights || '300,500' }}
       LIGATIONS: ${{ inputs.ligations || 'default-calt' }}
+      WORKFLOW_NAME: ${{ github.workflow }}
+      REF_NAME: ${{ github.ref_name }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: "22"
 
       - name: Clone Iosevka
         run: |
           set -euo pipefail
-          if [ -n "$IOSEVKA_REF" ]; then
-            git clone --depth 1 --branch "$IOSEVKA_REF" https://github.com/be5invis/Iosevka.git iosevka
-          else
-            git clone --depth 1 https://github.com/be5invis/Iosevka.git iosevka
-          fi
+          git clone --depth 1 https://github.com/be5invis/Iosevka.git iosevka
           cd iosevka
+          if [ -n "$IOSEVKA_REF" ]; then
+            # Fetch rather than clone --branch, which resolves only branches and
+            # tags: this accepts the commit form the input documents too.
+            git fetch --depth 1 origin "$IOSEVKA_REF"
+            git checkout --detach FETCH_HEAD
+          fi
           echo "IOSEVKA_VERSION=$(node -p 'require("./package.json").version')" >> "$GITHUB_ENV"
           echo "IOSEVKA_COMMIT=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
           echo "Iosevka $(node -p 'require("./package.json").version') at $(git rev-parse --short HEAD)"
@@ -152,7 +160,7 @@ jobs:
           done < <(find iosevka/dist -name '*.woff2' | sort)
           {
             echo "Iosevka $IOSEVKA_VERSION at $IOSEVKA_COMMIT"
-            echo "built $(date -u +%FT%TZ) by ${{ github.workflow }} on ${{ github.ref_name }}"
+            echo "built $(date -u +%FT%TZ) by $WORKFLOW_NAME on $REF_NAME"
             echo
             echo "ligations: $LIGATIONS"
             echo
@@ -171,13 +179,13 @@ jobs:
           PY
           cat out/MANIFEST.txt
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: iosevka-sprue-subset
           path: out/
           if-no-files-found: error
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: iosevka-sprue-full
           path: iosevka/dist/**/*.woff2
