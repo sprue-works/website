@@ -5,3 +5,8 @@
 /brand/*
   Cache-Control: public, max-age=31536000, immutable
   Access-Control-Allow-Origin: *
+
+# Picker font files are content-versioned by the directory name (the Iosevka
+# build they came from), so a given path never changes contents.
+/picker/fonts/*
+  Cache-Control: public, max-age=31536000, immutable

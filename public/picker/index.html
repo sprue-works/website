@@ -156,8 +156,10 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
 
     <script>
       // family -> [source, minWeight, maxWeight, generic, fixedWeights?, axisSpec?]
-      // source is the Google Fonts family name, or "@<slug>" for a Fontsource
-      // package served from jsDelivr (faces Google Fonts doesn't carry).
+      // source is the Google Fonts family name, "@<slug>" for a Fontsource
+      // package served from jsDelivr (faces Google Fonts doesn't carry), or a
+      // path starting with "/" for faces served from this origin, where each
+      // weight is "<path>-<weight>.woff2".
       const FAMILIES = {
         "Nunito":              ["Nunito", 200, 1000, "sans-serif"],
         "Quicksand":           ["Quicksand", 300, 700, "sans-serif"],
@@ -182,9 +184,15 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
         "Atkinson Hyperlegible Mono": ["Atkinson+Hyperlegible+Mono", 200, 800, "monospace"],
         "Sometype Mono":       ["Sometype+Mono", 400, 700, "monospace"],
         // Iosevka (OFL, github.com/be5invis/Iosevka): a stroke-built mono whose
-        // widths are drawn, not scaled. Fontsource ships the normal width only;
-        // the Extended cuts would need self-hosting from the release zips.
+        // widths are drawn, not scaled. The official current release is on
+        // Fontsource in the normal width only, so the two self-hosted entries
+        // below carry the drawn Extended cut (0.576em per character against
+        // 0.500em, at the same x-height) plus its own normal width for an
+        // apples-to-apples comparison. See picker/fonts/iosevka-4.5/README.md
+        // for provenance, the subsetting, and how to swap in our own build.
         "Iosevka":             ["@iosevka", 100, 900, "monospace"],
+        "Iosevka 4.5":          ["/picker/fonts/iosevka-4.5/normal", 100, 900, "monospace"],
+        "Iosevka 4.5 Extended": ["/picker/fonts/iosevka-4.5/extended", 100, 900, "monospace"],
         "Recursive":           ["Recursive", 300, 1000, "sans-serif", null, "wght,CASL,MONO@300..1000,0..1,0..1"],
         // The theme's body face (--sw-font-body): the platform UI stack, nothing to load.
         // Offered for the Body and Code roles only; the wordmark roles are measured on canvas
@@ -200,14 +208,21 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
       const col = (k, d) => own(PALETTE, q.get(k)) ? q.get(k) : d;
 
       const fontsource = (src) => src && src.startsWith("@");
+      const selfHosted = (src) => src && src.startsWith("/");
+      const weights = (lo, hi, fixed) => fixed || Array.from({ length: (hi - lo) / 100 + 1 }, (_, i) => lo + i * 100);
       document.getElementById("gf").href = "https://fonts.googleapis.com/css2?" +
-        Object.values(FAMILIES).filter(([gf]) => gf && !fontsource(gf)).map(([gf, lo, hi, , fixed, axes]) =>
+        Object.values(FAMILIES).filter(([gf]) => gf && !fontsource(gf) && !selfHosted(gf)).map(([gf, lo, hi, , fixed, axes]) =>
           "family=" + gf + ":" + (axes || ("wght@" + (fixed ? fixed.join(";") : lo + ".." + hi)))).join("&") + "&display=swap";
       // Fontsource publishes one stylesheet per weight; each declares the family under its own name.
       for (const [src, lo, hi, , fixed] of Object.values(FAMILIES)) if (fontsource(src))
-        for (const w of fixed || Array.from({ length: (hi - lo) / 100 + 1 }, (_, i) => lo + i * 100)) {
+        for (const w of weights(lo, hi, fixed)) {
           const l = document.createElement("link"); l.rel = "stylesheet"; l.href = `https://cdn.jsdelivr.net/npm/@fontsource/${src.slice(1)}@5/${w}.css`; document.head.appendChild(l);
         }
+      // Faces from this origin: one @font-face per weight, named after the picker's
+      // own key. A browser fetches a file only once a rule actually selects it.
+      const faces = Object.entries(FAMILIES).filter(([, [src]]) => selfHosted(src)).flatMap(([name, [src, lo, hi, , fixed]]) =>
+        weights(lo, hi, fixed).map((w) => `@font-face{font-family:"${name}";font-weight:${w};font-style:normal;font-display:swap;src:url("${src}-${w}.woff2") format("woff2")}`)).join("");
+      if (faces) document.head.appendChild(Object.assign(document.createElement("style"), { textContent: faces }));
 
       const form = document.getElementById("picker");
       const root = document.documentElement.style;
