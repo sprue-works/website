@@ -71,6 +71,9 @@ jobs:
           fi
           echo "IOSEVKA_VERSION=$(node -p 'require("./package.json").version')" >> "$GITHUB_ENV"
           echo "IOSEVKA_COMMIT=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+          # The upstream commit's own date, used below to pin the fonts' build
+          # timestamps so a rebuild is byte-for-byte comparable.
+          echo "IOSEVKA_EPOCH=$(git log -1 --format=%ct)" >> "$GITHUB_ENV"
           echo "Iosevka $(node -p 'require("./package.json").version') at $(git rev-parse --short HEAD)"
 
       - name: Install build dependencies
@@ -165,18 +168,34 @@ jobs:
             echo
             echo "ligations: $LIGATIONS"
             echo
-            printf '%-40s %7s %7s %6s %7s %s\n' file advance xHeight upem bytes features
+            echo "timestamps pinned to the upstream commit's date ($IOSEVKA_EPOCH), so a"
+            echo "rebuild of the same commit and plan reproduces these bytes exactly."
+            echo
+            printf '%-40s %7s %7s %6s %7s %-9s %s\n' file advance xHeight upem bytes features sha256
           } > out/MANIFEST.txt
           python3 - <<'PY' >> out/MANIFEST.txt
-          import glob, os
+          import glob, hashlib, os
           from fontTools.ttLib import TTFont
+          from fontTools.misc.timeTools import timestampSinceEpoch
+          # Iosevka stamps each face with the wall clock, which is the only thing
+          # that differs between two builds of the same commit and plan. Pin both
+          # dates to the upstream commit's own, and the output becomes
+          # reproducible: same commit and plan gives the same bytes, so a
+          # committed font's origin can be checked by rebuilding it.
+          epoch = timestampSinceEpoch(int(os.environ["IOSEVKA_EPOCH"]))
+          for f in sorted(glob.glob("out/*.woff2")):
+              t = TTFont(f)
+              t["head"].created = t["head"].modified = epoch
+              t.flavor = "woff2"
+              t.save(f)
           for f in sorted(glob.glob("out/*.woff2")):
               t = TTFont(f)
               adv = t["hmtx"]["x"][0] if "x" in t["hmtx"].metrics else -1
               feats = sorted({r.FeatureTag for r in t["GSUB"].table.FeatureList.FeatureRecord}) if "GSUB" in t else []
               lig = [x for x in ("calt", "liga", "dlig", "clig") if x in feats]
+              digest = hashlib.sha256(open(f, "rb").read()).hexdigest()[:16]
               print(f'{os.path.basename(f):<40} {adv:>7} {getattr(t["OS/2"],"sxHeight",-1):>7} '
-                    f'{t["head"].unitsPerEm:>6} {os.path.getsize(f):>7} {",".join(lig) or "none"}')
+                    f'{t["head"].unitsPerEm:>6} {os.path.getsize(f):>7} {",".join(lig) or "none":<9} {digest}')
           PY
           cat out/MANIFEST.txt
 
