@@ -1,15 +1,17 @@
-# sprue.works brand theme
+# sprue.works brand assets
 
-The org's colours and typefaces as one hosted stylesheet of CSS custom
-properties, so any sprue.works property can use them with no tooling:
+Two hosted stylesheets, so any sprue.works property can use the brand with no
+tooling:
 
-    https://sprue.works/brand/v1/theme.css
+    https://sprue.works/brand/v1/theme.css     colours and typefaces as tokens
+    https://sprue.works/brand/v1/wordmark.css  the wordmark built from them
 
-The source is `public/brand/v1/theme.css` in this repo (the site has no build
-step, so the served file is the source). Other brand assets will sit next to it
-under `/brand/v1/`, e.g. the logo at `/brand/v1/logo.svg` once #1 lands.
+The sources are `public/brand/v1/theme.css` and `public/brand/v1/wordmark.css`
+in this repo (the site has no build step, so the served files are the sources).
+Other brand assets will sit next to them under `/brand/v1/`, e.g. the logo at
+`/brand/v1/logo.svg` once #1 lands.
 
-## Use it
+## Use the theme
 
 Paste into `<head>`, before your own stylesheet:
 
@@ -75,17 +77,64 @@ does not load a webfont.
 Spacing `--sw-space-1` … `--sw-space-8` (0.25, 0.5, 0.75, 1, 1.5, 2, 3, 4 rem)
 and radii `--sw-radius-sm` / `-md` / `-lg` / `-full` (2px, 4px, 8px, pill).
 
+## Use the wordmark
+
+`wordmark.css` holds the rules that turn the wordmark tokens into the mark, so
+no property has to copy them. Link it after the theme, which is what loads the
+webfonts, and write the three spans with **no whitespace between them**:
+
+```html
+<link rel="stylesheet" href="https://sprue.works/brand/v1/theme.css" />
+<link rel="stylesheet" href="https://sprue.works/brand/v1/wordmark.css" />
+
+<a class="sw-wordmark" href="https://sprue.works"><span class="sw-wordmark__sprue">sprue</span><span class="sw-wordmark__dot">.</span><span class="sw-wordmark__works">works</span></a>
+```
+
+The spans go inside any element you like — a link, a heading, a nav item.
+
+**Colour and size are inherited.** The file sets no `color` and no
+`font-size`, so the mark comes out in the surrounding text's `currentColor` at
+the surrounding text's size; style the element around it as you would any other
+text. Add `sw-wordmark--brand` for the coloured logo treatment, which sets each
+span from `--sw-color-sprue` / `--sw-color-dot` / `--sw-color-works` and so
+follows the light/dark scheme:
+
+```html
+<span class="sw-wordmark sw-wordmark--brand">… the same three spans …</span>
+```
+
+| Class | What it does |
+|---|---|
+| `.sw-wordmark` | keeps the mark on one line and resets inherited letter-spacing |
+| `.sw-wordmark__sprue` | Quicksand 700 |
+| `.sw-wordmark__dot` | Nunito 300, pulled `--sw-dot-gap-after` closer to "works" |
+| `.sw-wordmark__works` | IBM Plex Mono 300, scaled and tracked to match "sprue" |
+| `.sw-wordmark--brand` | modifier: colours the three spans from the palette |
+
+Every value comes from a `--sw-*` token with the token's own value as a literal
+fallback, so the mark still sets if the theme is unreachable — on the
+platform's own faces, since the webfonts come from the theme too, and on the
+light-scheme colours, since the dark ones do as well.
+
+The tracking on "works" is trailing as well as internal, so inline the mark
+sits about 0.09em closer to whatever follows it than normal text would. Add a
+little space after it if that reads tight at your size.
+
 ## Versioning and caching
 
-`/brand/v1/` is cached with `Cache-Control: public, max-age=31536000,
-immutable` (see `public/_headers`). The rule:
+Everything under `/brand/v1/` is cached with `Cache-Control: public,
+max-age=31536000, immutable` (see the `/brand/*` rule in `public/_headers`).
+The rule, for both files:
 
-- **Additive** changes (a new token, an adjusted value) stay in v1. Because of
-  the immutable cache, repeat visitors of a consumer pick them up only when
-  their cached copy expires, so treat value changes as slow to roll out.
-- **Breaking** changes (renaming or removing a token) ship as
-  `/brand/v2/theme.css`; v1 keeps serving unchanged.
+- **Additive** changes (a new token or class, an adjusted value) stay in v1.
+  Because of the immutable cache, repeat visitors of a consumer pick them up
+  only when their cached copy expires, so treat value changes as slow to roll
+  out.
+- **Breaking** changes (renaming or removing a token or a class) ship as
+  `/brand/v2/`; v1 keeps serving unchanged.
 
-The home page at https://sprue.works is the first consumer: `public/style.css`
-reads every colour and typeface from these variables, so the site cannot drift
-from the theme.
+The home page at https://sprue.works is the first consumer of both:
+`public/style.css` reads every colour and typeface from the theme's variables
+and is left with nothing but the page's own display sizing of the mark, and
+`public/index.html` carries the same `sw-wordmark` classes any other property
+would. Neither file can drift from what is served.
