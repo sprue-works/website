@@ -108,7 +108,7 @@ follows the light/dark scheme:
 | `.sw-wordmark` | keeps the mark on one line and resets inherited letter-spacing |
 | `.sw-wordmark__sprue` | Quicksand 700 |
 | `.sw-wordmark__dot` | Nunito 300, pulled `--sw-dot-gap-after` closer to "works" |
-| `.sw-wordmark__works` | IBM Plex Mono 300, scaled and tracked to match "sprue" |
+| `.sw-wordmark__works` | IBM Plex Mono 300, scaled and tracked to match "sprue", with the tracking's trailing edge given back |
 | `.sw-wordmark--brand` | modifier: colours the three spans from the palette |
 
 Every value comes from a `--sw-*` token with the token's own value as a literal
@@ -116,9 +116,12 @@ fallback, so the mark still sets if the theme is unreachable — on the
 platform's own faces, since the webfonts come from the theme too, and on the
 light-scheme colours, since the dark ones do as well.
 
-The tracking on "works" is trailing as well as internal, so inline the mark
-sits about 0.09em closer to whatever follows it than normal text would. Add a
-little space after it if that reads tight at your size.
+The mark occupies its true width, so it sits in a line exactly as the same
+words set in the same faces would — there is nothing to compensate for at your
+end. (CSS applies `letter-spacing` after the last letter as well as between
+them, and the tracking on "works" was measured across the four gaps between
+the five letters, not five; `wordmark.css` gives the difference back as a
+margin so it cannot eat space after the mark.)
 
 ## Versioning and caching
 
