@@ -105,7 +105,7 @@ follows the light/dark scheme:
 
 | Class | What it does |
 |---|---|
-| `.sw-wordmark` | keeps the mark on one line and resets inherited letter-spacing |
+| `.sw-wordmark` | keeps the mark on one line, resets inherited letter-spacing, and sets it left to right as a bidi isolate |
 | `.sw-wordmark__sprue` | Quicksand 700 |
 | `.sw-wordmark__dot` | Nunito 300, pulled `--sw-dot-gap-after` closer to "works" |
 | `.sw-wordmark__works` | IBM Plex Mono 300, scaled and tracked to match "sprue", with the tracking's trailing edge given back |
@@ -122,6 +122,11 @@ end. (CSS applies `letter-spacing` after the last letter as well as between
 them, and the tracking on "works" was measured across the four gaps between
 the five letters, not five; `wordmark.css` gives the difference back as a
 margin so it cannot eat space after the mark.)
+
+**It is safe in an RTL page.** The mark is set `direction: ltr` and isolated
+from the surrounding bidi run, so it keeps its own order and, more usefully,
+stops neutral text next to it — punctuation, a parenthetical, a year — from
+being pulled to the wrong side of it.
 
 ## Versioning and caching
 
