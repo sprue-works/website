@@ -1,0 +1,173 @@
+# Build the brand's Iosevka cuts from source (#15).
+#
+# The picker currently serves a third-party Iosevka build, because the session
+# that added it could not reach the Iosevka repository. This workflow is how we
+# get our own: it builds the widths we care about from the upstream source with
+# our own build plan, subsets them, and uploads the result as artifacts for
+# inspection before anything is committed.
+#
+# Dispatch only: it never runs on a push. Nothing in the site depends on it, and
+# a build takes minutes per style.
+name: Build Iosevka
+
+on:
+  workflow_dispatch:
+    inputs:
+      iosevka_ref:
+        description: Iosevka git ref to build (branch, tag or commit; blank = default branch)
+        required: false
+        default: ""
+      weights:
+        description: 'CSS weights to build, comma separated (e.g. "300,500" or "100,200,300,400,500,600,700,800,900")'
+        required: false
+        default: "300,500"
+      ligations:
+        description: 'Ligation set to inherit (e.g. default-calt, dlig, haskell, ml, python; "none" to build without)'
+        required: false
+        default: "default-calt"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Clone Iosevka
+        run: |
+          set -euo pipefail
+          if [ -n "${{ inputs.iosevka_ref }}" ]; then
+            git clone --depth 1 --branch "${{ inputs.iosevka_ref }}" https://github.com/be5invis/Iosevka.git iosevka
+          else
+            git clone --depth 1 https://github.com/be5invis/Iosevka.git iosevka
+          fi
+          cd iosevka
+          echo "IOSEVKA_VERSION=$(node -p 'require("./package.json").version')" >> "$GITHUB_ENV"
+          echo "IOSEVKA_COMMIT=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+          echo "Iosevka $(node -p 'require("./package.json").version') at $(git rev-parse --short HEAD)"
+
+      - name: Install build dependencies
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq && sudo apt-get install -y -qq ttfautohint || echo "ttfautohint unavailable; continuing"
+          cd iosevka && npm install --no-audit --no-fund
+
+      - name: Write the build plan
+        run: |
+          set -euo pipefail
+          # Two widths of one upright family. shape is the advance width in
+          # 1000ths of an em, which is the whole point: normal is 500 and the
+          # drawn Extended is 576, and any value between them is available here.
+          {
+            echo '[buildPlans.IosevkaSprue]'
+            echo 'family = "Iosevka Sprue"'
+            echo 'spacing = "normal"'
+            echo 'serifs = "sans"'
+            echo 'noCvSs = true'
+            echo 'exportGlyphNames = false'
+            echo
+            # Code ligatures. A set inherited here lands in calt, which is on by
+            # default in browsers and editors, so arrows and == come out ligated
+            # without the consumer opting in. "none" builds the plain forms.
+            if [ "${{ inputs.ligations }}" != "none" ]; then
+              echo '  [buildPlans.IosevkaSprue.ligations]'
+              echo '  inherits = "${{ inputs.ligations }}"'
+              echo
+            fi
+            echo '  [buildPlans.IosevkaSprue.slopes.upright]'
+            echo '  angle = 0'
+            echo '  shape = "upright"'
+            echo '  menu  = "upright"'
+            echo '  css   = "normal"'
+            echo
+            echo '  [buildPlans.IosevkaSprue.widths.normal]'
+            echo '  shape = 500'
+            echo '  menu  = 5'
+            echo '  css   = "normal"'
+            echo
+            echo '  [buildPlans.IosevkaSprue.widths.extended]'
+            echo '  shape = 576'
+            echo '  menu  = 7'
+            echo '  css   = "expanded"'
+            echo
+            IFS=','
+            for w in ${{ inputs.weights }}; do
+              w=$(echo "$w" | tr -d ' ')
+              case "$w" in
+                100) name=thin ;; 200) name=extralight ;; 300) name=light ;;
+                400) name=regular ;; 500) name=medium ;; 600) name=semibold ;;
+                700) name=bold ;; 800) name=extrabold ;; 900) name=heavy ;;
+                *) echo "unknown weight $w" >&2; exit 1 ;;
+              esac
+              echo "  [buildPlans.IosevkaSprue.weights.$name]"
+              echo "  shape = $w"
+              echo "  menu  = $w"
+              echo "  css   = $w"
+              echo
+            done
+          } > iosevka/private-build-plans.toml
+          cat iosevka/private-build-plans.toml
+
+      - name: Build
+        run: |
+          set -euo pipefail
+          cd iosevka
+          # Target names have moved between Iosevka majors; try the webfont
+          # bundle first and fall back to the plain woff2 target.
+          npm run build -- webfont::IosevkaSprue || npm run build -- woff2::IosevkaSprue
+          echo "--- produced:"
+          find dist -name '*.woff2' | sort
+
+      - name: Subset to Latin and report metrics
+        run: |
+          set -euo pipefail
+          python3 -m pip install --quiet fonttools brotli
+          mkdir -p out
+          U="U+0020-007E,U+00A0-00FF,U+2013,U+2014,U+2018-201A,U+201C-201E,U+2022,U+2026"
+          while IFS= read -r f; do
+            base=$(basename "$f" .woff2)
+            # Keep the ligature features: dropping them would subset away the
+            # very thing this build is for.
+            pyftsubset "$f" --unicodes="$U" --flavor=woff2 \
+              --layout-features='calt,liga,clig,dlig,kern' \
+              --no-hinting --desubroutinize --output-file="out/$base.woff2"
+          done < <(find iosevka/dist -name '*.woff2' | sort)
+          {
+            echo "Iosevka $IOSEVKA_VERSION at $IOSEVKA_COMMIT"
+            echo "built $(date -u +%FT%TZ) by ${{ github.workflow }} on ${{ github.ref_name }}"
+            echo
+            echo "ligations: ${{ inputs.ligations }}"
+            echo
+            printf '%-40s %7s %7s %6s %7s %s\n' file advance xHeight upem bytes features
+          } > out/MANIFEST.txt
+          python3 - <<'PY' >> out/MANIFEST.txt
+          import glob, os
+          from fontTools.ttLib import TTFont
+          for f in sorted(glob.glob("out/*.woff2")):
+              t = TTFont(f)
+              adv = t["hmtx"]["x"][0] if "x" in t["hmtx"].metrics else -1
+              feats = sorted({r.FeatureTag for r in t["GSUB"].table.FeatureList.FeatureRecord}) if "GSUB" in t else []
+              lig = [x for x in ("calt", "liga", "dlig", "clig") if x in feats]
+              print(f'{os.path.basename(f):<40} {adv:>7} {getattr(t["OS/2"],"sxHeight",-1):>7} '
+                    f'{t["head"].unitsPerEm:>6} {os.path.getsize(f):>7} {",".join(lig) or "none"}')
+          PY
+          cat out/MANIFEST.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iosevka-sprue-subset
+          path: out/
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iosevka-sprue-full
+          path: iosevka/dist/**/*.woff2
+          if-no-files-found: error
