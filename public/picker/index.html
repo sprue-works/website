@@ -307,7 +307,9 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
         const differs = S.fS !== S.fW || S.wS !== S.wW || S.fS === "Recursive";
         const matchW = S.wd && (differs || S.lsS !== S.lsW);
         const pitchMode = S.wd && isMono(S.fW) && S.wdBy !== "ls";
-        const stretchMode = pitchMode && S.wdBy === "stretch" && S.xh && differs; // Y from x-height, X from pitch: a deliberate distortion, read the % before keeping it
+        // Y from x-height, X from pitch: a deliberate distortion, read the % before keeping it.
+        // Not gated on differs: identical faces have an x-height ratio of 1, and the stretch still has work to do.
+        const stretchMode = pitchMode && S.wdBy === "stretch" && S.xh;
         document.getElementById("wdbyrow").hidden = !(S.wd && isMono(S.fW));
 
         // x-height: scale works so its lowercase x matches sprue's; the dot follows whichever side it locks to

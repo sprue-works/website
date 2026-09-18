@@ -66,9 +66,12 @@ npm run build -- webfont::IosevkaSprue
 ```
 
 The build emits woff2 under `dist/IosevkaSprue/WOFF2/`. Subset those the same
-way, drop them in beside these files, and the picker needs no change beyond the
-family names. `shape` is the advance width in 1000ths of an em, so a width
-between the two cuts above is just another entry in that table.
+way and put them in a **new sibling directory** named for that build, then point
+the `FAMILIES` paths in the picker at it. Do not overwrite the files here: the
+`/picker/fonts/*` rule in `public/_headers` serves these paths as `immutable`
+for a year, so a given path has to keep its bytes forever and a new build is a
+new path. `shape` is the advance width in 1000ths of an em, so a width between
+the two cuts above is just another entry in that table.
 
 This was not run here: the session had no network access to the Iosevka
 repository, so the files in this directory are the third-party build described

@@ -1,4 +1,8 @@
-Copyright (c) 2015-2023, Renzhi Li (aka. Belleve Invis, belleve@typeof.net)
+Copyright (c) 2015-2021, Renzhi Li (aka. Belleve Invis, belleve@typeof.net)
+
+The year above is the copyright notice carried by the font files in this
+directory (the 4.5.0 build); the licence text below is the unmodified SIL
+Open Font License 1.1.
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 
