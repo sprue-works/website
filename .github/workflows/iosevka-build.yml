@@ -32,8 +32,11 @@ on:
         required: false
         default: "default-calt"
 
-permissions:
-  contents: read
+# This job installs and builds a third-party tree, whose npm lifecycle scripts
+# run arbitrary code on the runner. So it gets no token at all, and it does not
+# check this repository out: nothing here reads it, and a checkout would leave
+# credentials in .git/config for that code to find.
+permissions: {}
 
 concurrency:
   group: iosevka-build-${{ github.ref }}
@@ -51,8 +54,6 @@ jobs:
       WORKFLOW_NAME: ${{ github.workflow }}
       REF_NAME: ${{ github.ref_name }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: "22"
