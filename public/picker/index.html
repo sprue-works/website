@@ -207,6 +207,9 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
       const own = (o, k) => Object.hasOwn(o, k);
       const col = (k, d) => own(PALETTE, q.get(k)) ? q.get(k) : d;
 
+      // Pinned, not @5: a later 5.x could swap the files and with them every width
+      // this tool measures, for picker URLs already shared.
+      const FONTSOURCE_VER = "5.3.0";
       const fontsource = (src) => src && src.startsWith("@");
       const selfHosted = (src) => src && src.startsWith("/");
       const weights = (lo, hi, fixed) => fixed || Array.from({ length: (hi - lo) / 100 + 1 }, (_, i) => lo + i * 100);
@@ -216,7 +219,7 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
       // Fontsource publishes one stylesheet per weight; each declares the family under its own name.
       for (const [src, lo, hi, , fixed] of Object.values(FAMILIES)) if (fontsource(src))
         for (const w of weights(lo, hi, fixed)) {
-          const l = document.createElement("link"); l.rel = "stylesheet"; l.href = `https://cdn.jsdelivr.net/npm/@fontsource/${src.slice(1)}@5/${w}.css`; document.head.appendChild(l);
+          const l = document.createElement("link"); l.rel = "stylesheet"; l.href = `https://cdn.jsdelivr.net/npm/@fontsource/${src.slice(1)}@${FONTSOURCE_VER}/${w}.css`; document.head.appendChild(l);
         }
       // Faces from this origin: one @font-face per weight, named after the picker's
       // own key. A browser fetches a file only once a rule actually selects it.
@@ -352,7 +355,8 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
         form.lock_c.value = S.lockC; form.f_c.value = S.fC; form.f_c.disabled = S.lockC !== "none"; setRange(form.w_c, S.fC, S.wC); form.w_c.disabled = S.lockC !== "none"; form.ow_c.value = S.wC;
         form.c_s.value = S.cS; form.c_d.value = S.cD; form.c_w.value = S.cW; form.c_bg.value = S.cBg;
         form.dotb.value = S.dotB; form.dota.value = S.dotA; form.odotb.value = S.dotB.toFixed(3) + "em"; form.odota.value = S.dotA.toFixed(3) + "em";
-        form.xh.checked = S.xh; form.xh.disabled = pitchMode && S.wdBy === "pitch"; form.oxh.value = !S.xh ? "" : pitchMode && S.wdBy === "pitch" ? "(pitch sets size)" : xscale === 1 ? "" : "×" + xscale.toFixed(3);
+        form.xh.checked = S.xh; form.xh.disabled = pitchMode && S.wdBy === "pitch";
+        form.oxh.value = form.xh.disabled ? "(pitch sets size)" : S.xh && xscale !== 1 ? "×" + xscale.toFixed(3) : "";
         form.wd.checked = S.wd; form.owd.value = pitchMode && !stretchMode ? "×" + xscale.toFixed(3) : stretchMode ? "" : widthLs === 0 ? "" : (widthLs > 0 ? "+" : "") + widthLs.toFixed(3) + "em";
         const stretchPct = (xstretch - 1) * 100;
         form.wd_by.value = S.wdBy; form.owdby.value = xstretch === 1 ? "" : `X ${stretchPct > 0 ? "+" : ""}${stretchPct.toFixed(1)}%` + (Math.abs(stretchPct) > 10 ? " (heavy)" : "");
