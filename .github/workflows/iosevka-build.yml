@@ -6,11 +6,17 @@
 # our own build plan, subsets them, and uploads the result as artifacts for
 # inspection before anything is committed.
 #
-# Dispatch only: it never runs on a push. Nothing in the site depends on it, and
-# a build takes minutes per style.
+# Two triggers, because GitHub only registers workflow_dispatch from the default
+# branch: until this file is on main, a push that touches it is the only way to
+# run it, so the file itself is the trigger and the inputs fall back to their
+# defaults. Nothing else in the site depends on this, and a build takes minutes
+# per style, so it never runs on an ordinary push.
 name: Build Iosevka
 
 on:
+  push:
+    paths:
+      - .github/workflows/iosevka-build.yml
   workflow_dispatch:
     inputs:
       iosevka_ref:
@@ -33,6 +39,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    # A push carries no inputs, so every knob needs its default here too.
+    env:
+      IOSEVKA_REF: ${{ inputs.iosevka_ref || '' }}
+      WEIGHTS: ${{ inputs.weights || '300,500' }}
+      LIGATIONS: ${{ inputs.ligations || 'default-calt' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -43,8 +54,8 @@ jobs:
       - name: Clone Iosevka
         run: |
           set -euo pipefail
-          if [ -n "${{ inputs.iosevka_ref }}" ]; then
-            git clone --depth 1 --branch "${{ inputs.iosevka_ref }}" https://github.com/be5invis/Iosevka.git iosevka
+          if [ -n "$IOSEVKA_REF" ]; then
+            git clone --depth 1 --branch "$IOSEVKA_REF" https://github.com/be5invis/Iosevka.git iosevka
           else
             git clone --depth 1 https://github.com/be5invis/Iosevka.git iosevka
           fi
@@ -76,9 +87,9 @@ jobs:
             # Code ligatures. A set inherited here lands in calt, which is on by
             # default in browsers and editors, so arrows and == come out ligated
             # without the consumer opting in. "none" builds the plain forms.
-            if [ "${{ inputs.ligations }}" != "none" ]; then
+            if [ "$LIGATIONS" != "none" ]; then
               echo '  [buildPlans.IosevkaSprue.ligations]'
-              echo '  inherits = "${{ inputs.ligations }}"'
+              echo "  inherits = \"$LIGATIONS\""
               echo
             fi
             echo '  [buildPlans.IosevkaSprue.slopes.upright]'
@@ -98,7 +109,7 @@ jobs:
             echo '  css   = "expanded"'
             echo
             IFS=','
-            for w in ${{ inputs.weights }}; do
+            for w in $WEIGHTS; do
               w=$(echo "$w" | tr -d ' ')
               case "$w" in
                 100) name=thin ;; 200) name=extralight ;; 300) name=light ;;
@@ -143,7 +154,7 @@ jobs:
             echo "Iosevka $IOSEVKA_VERSION at $IOSEVKA_COMMIT"
             echo "built $(date -u +%FT%TZ) by ${{ github.workflow }} on ${{ github.ref_name }}"
             echo
-            echo "ligations: ${{ inputs.ligations }}"
+            echo "ligations: $LIGATIONS"
             echo
             printf '%-40s %7s %7s %6s %7s %s\n' file advance xHeight upem bytes features
           } > out/MANIFEST.txt
