@@ -28,7 +28,7 @@
          centring pad is added to that same margin. */
       .sw-wordmark__sprue { color: var(--c-sprue); font-family: var(--f-sprue); font-weight: var(--w-sprue); font-variation-settings: var(--fvs-sprue, normal); letter-spacing: var(--ls-sprue, 0em); }
       .sw-wordmark__dot   { font-family: var(--f-dot);   font-weight: var(--w-dot);   font-variation-settings: var(--fvs-dot, normal);   font-size: calc(1em * var(--dscale, 1)); color: var(--c-dot); margin-left: var(--dot-before, 0em); margin-right: var(--dot-after, 0em); letter-spacing: 0; }
-      .sw-wordmark__works { color: var(--c-works); font-family: var(--f-works); font-weight: var(--w-works); font-variation-settings: var(--fvs-works, normal); font-size: calc(1em * var(--xscale, 1)); letter-spacing: calc(var(--ls-works, 0em) + var(--pitch-ls, 0em) + var(--width-ls, 0em)); display: inline-block; transform: scaleX(var(--xstretch, 1)); transform-origin: left center; margin-right: calc(-1 * (var(--ls-works, 0em) + var(--pitch-ls, 0em) + var(--width-ls, 0em)) + var(--stretch-pad, 0px)); }
+      .sw-wordmark__works { color: var(--c-works); font-family: var(--f-works); font-weight: var(--w-works); font-variation-settings: var(--fvs-works, normal); font-size: calc(1em * var(--xscale, 1)); letter-spacing: calc(var(--ls-works, 0em) + var(--pitch-ls, 0em) + var(--width-ls, 0em)); display: inline-block; transform: scaleX(var(--xstretch, 1)); transform-origin: left center; margin-right: calc(-1 * (var(--ls-works, 0em) + var(--pitch-ls, 0em) + var(--width-ls, 0em)) + var(--stretch-pad, 0em)); }
       main { padding-bottom: calc(var(--panel-h, 24rem) + 2rem); align-content: center; } /* --panel-h is the measured height of #picker; align-content keeps the sample under the wordmark on tall viewports */
       /* Sample body copy (#8): judges the Body and Code roles as running text.
          Kept visually secondary to the wordmark: measure-limited and coloured
@@ -216,11 +216,19 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
       document.getElementById("gf").href = "https://fonts.googleapis.com/css2?" +
         Object.values(FAMILIES).filter(([gf]) => gf && !fontsource(gf) && !selfHosted(gf)).map(([gf, lo, hi, , fixed, axes]) =>
           "family=" + gf + ":" + (axes || ("wght@" + (fixed ? fixed.join(";") : lo + ".." + hi)))).join("&") + "&display=swap";
-      // Fontsource publishes one stylesheet per weight; each declares the family under its own name.
-      for (const [src, lo, hi, , fixed] of Object.values(FAMILIES)) if (fontsource(src))
+      // Fontsource publishes one stylesheet per weight; each declares the family under its own
+      // name. Injected the first time a role actually selects the family, so a visit that never
+      // picks one pays nothing, and re-measured once the faces arrive.
+      const fsLoaded = new Set();
+      const ensureFontsource = (fam) => {
+        const [src, lo, hi, , fixed] = FAMILIES[fam];
+        if (!fontsource(src) || fsLoaded.has(src)) return;
+        fsLoaded.add(src);
         for (const w of weights(lo, hi, fixed)) {
-          const l = document.createElement("link"); l.rel = "stylesheet"; l.href = `https://cdn.jsdelivr.net/npm/@fontsource/${src.slice(1)}@${FONTSOURCE_VER}/${w}.css`; document.head.appendChild(l);
+          const l = document.createElement("link"); l.rel = "stylesheet"; l.onload = () => later();
+          l.href = `https://cdn.jsdelivr.net/npm/@fontsource/${src.slice(1)}@${FONTSOURCE_VER}/${w}.css`; document.head.appendChild(l);
         }
+      };
       // Faces from this origin: one @font-face per weight, named after the picker's
       // own key. A browser fetches a file only once a rule actually selects it.
       const faces = Object.entries(FAMILIES).filter(([, [src]]) => selfHosted(src)).flatMap(([name, [src, lo, hi, , fixed]]) =>
@@ -294,6 +302,7 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
         S.wB = snap(S.fB, S.wB); S.wH = snap(S.fB, S.wH);
         if (S.lockC !== "none") [S.fC, S.wC] = S.lockC === "body" ? [S.fB, S.wB] : role[S.lockC];
         S.wC = snap(S.fC, S.wC);
+        for (const fam of [S.fS, S.fW, S.fD, S.fB, S.fC]) ensureFontsource(fam);
 
         // fonts
         root.setProperty("--f-sprue", stack(S.fS)); root.setProperty("--w-sprue", S.wS); root.setProperty("--fvs-sprue", fvs(S.fS)); root.setProperty("--ls-sprue", S.lsS + "em");
@@ -319,15 +328,22 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
         xstretch = 1;
         if (pitchMode) {
           if (stretchMode) { const a = xHeight(S.fS, S.wS), b = xHeight(S.fW, S.wW); if (a && b) xscale = a / b; else later(); }
-          root.setProperty("--pitch-ls", "0em"); root.setProperty("--width-ls", "0em"); root.setProperty("--xstretch", "1"); root.setProperty("--stretch-pad", "0px"); root.setProperty("--xscale", xscale.toFixed(4));
+          root.setProperty("--pitch-ls", "0em"); root.setProperty("--width-ls", "0em"); root.setProperty("--xstretch", "1"); root.setProperty("--stretch-pad", "0em"); root.setProperty("--xscale", xscale.toFixed(4));
           const w = inkWidth(".sw-wordmark__works"), t = inkWidth(".sw-wordmark__sprue");
           if (!(w > 0 && t > 0)) { xscale = 1; later(); }
-          else if (stretchMode) { xstretch = t / w; root.setProperty("--stretch-pad", ((xstretch - 1) * w).toFixed(2) + "px"); } // layout keeps the unstretched width; pad it so centring holds
+          else if (stretchMode) {
+            // Layout keeps the unstretched width, so pad it to keep the wordmark centred. In em
+            // against the works span, because the wordmark's own size follows the viewport and
+            // nothing re-measures on resize; a px pad would freeze at one viewport width.
+            xstretch = t / w;
+            const px = parseFloat(getComputedStyle(document.querySelector(".sw-wordmark__works")).fontSize);
+            root.setProperty("--stretch-pad", px ? ((xstretch - 1) * w / px).toFixed(4) + "em" : "0em");
+          }
           else xscale *= t / w;
         } else if (S.xh && differs) { const a = xHeight(S.fS, S.wS), b = xHeight(S.fW, S.wW); if (a && b) xscale = a / b; else later(); } else xscale = 1;
         dscale = S.lockD === "works" ? xscale : 1;
         root.setProperty("--xscale", xscale.toFixed(4)); root.setProperty("--dscale", dscale.toFixed(4)); root.setProperty("--xstretch", xstretch.toFixed(4));
-        if (xstretch === 1) root.setProperty("--stretch-pad", "0px");
+        if (xstretch === 1) root.setProperty("--stretch-pad", "0em");
 
         // pitch: two monos -> tracking on works so per-character advance matches sprue's (words only)
         const bothMono = isMono(S.fS) && isMono(S.fW) && (S.fS !== S.fW || S.wS !== S.wW || S.lsS !== S.lsW);
