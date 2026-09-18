@@ -1,0 +1,76 @@
+/* sprue.works wordmark, v1
+   https://sprue.works/brand/v1/wordmark.css
+
+   The composition of the text wordmark — "sprue", the dot, "works" — as four
+   classes. The theme at /brand/v1/theme.css publishes the faces, weights and
+   optical corrections as --sw-* tokens; this file is the one place that turns
+   them into a mark, so no consumer has to copy the rules. Both files are
+   needed: the theme also loads the webfonts.
+
+   No colour and no size. The mark inherits currentColor and font-size, so it
+   comes out at whatever size and colour the surrounding text has — a footer
+   link, a heading, a nav item. Add .sw-wordmark--brand for the logo
+   treatment, which colours each span from the theme's palette.
+
+   Markup: three spans inside any element, with no whitespace between them
+   (the mark is one word, and a space between the spans would render).
+
+     <link rel="stylesheet" href="https://sprue.works/brand/v1/theme.css" />
+     <link rel="stylesheet" href="https://sprue.works/brand/v1/wordmark.css" />
+
+     <a class="sw-wordmark" href="https://sprue.works"><span class="sw-wordmark__sprue">sprue</span><span class="sw-wordmark__dot">.</span><span class="sw-wordmark__works">works</span></a>
+
+   Every var() below carries the token's own value as a literal fallback, the
+   same way brand/README.md asks consumers to write theirs, so the mark still
+   sets if the theme is unreachable — on the platform's own faces, since the
+   webfonts come from the theme too. The dark-scheme colours live in the theme
+   as well, so .sw-wordmark--brand without it stays on the light-scheme values.
+
+   Versioning, as for the theme: additive changes (new classes, adjusted
+   values) land in v1; a rename or removal ships as /brand/v2/wordmark.css.
+   This file is served with a long immutable Cache-Control, so a change reaches
+   a consumer's repeat visitors only once their cached copy expires. */
+
+.sw-wordmark {
+  /* The three parts read as one word, and the tracking below is measured
+     against no other tracking, so a consumer's letter-spacing is reset here
+     rather than left to apply to two of the three spans. */
+  white-space: nowrap;
+  letter-spacing: normal;
+}
+
+.sw-wordmark__sprue {
+  font-family: var(--sw-font-sprue, "Quicksand", system-ui, -apple-system, "Segoe UI", sans-serif);
+  font-weight: var(--sw-weight-sprue, 700);
+}
+
+.sw-wordmark__dot {
+  font-family: var(--sw-font-dot, "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif);
+  font-weight: var(--sw-weight-dot, 300);
+  margin-right: var(--sw-dot-gap-after, -0.035em);
+}
+
+.sw-wordmark__works {
+  font-family: var(--sw-font-works, "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-weight: var(--sw-weight-works, 300);
+  /* Scaled so its x-height matches Quicksand's, then tracked so the word is
+     as wide as "sprue". Both are em-relative, so they hold at any size. */
+  font-size: calc(1em * var(--sw-works-scale, 1.0368));
+  letter-spacing: var(--sw-works-tracking, -0.0939em);
+}
+
+/* ---- Brand colours -------------------------------------------------------
+   The logo treatment, opt-in: without this modifier every span is
+   currentColor, which is what a link or a heading wants. */
+
+.sw-wordmark--brand .sw-wordmark__sprue {
+  color: var(--sw-color-sprue, #251818);
+}
+
+.sw-wordmark--brand .sw-wordmark__dot {
+  color: var(--sw-color-dot, #134e4a);
+}
+
+.sw-wordmark--brand .sw-wordmark__works {
+  color: var(--sw-color-works, #904114);
+}
