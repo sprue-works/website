@@ -11,22 +11,28 @@
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#fff7ed" />
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#251818" />
 
-    <!-- Brand tokens (typefaces, palette). theme.css @imports the Google Fonts
-         CSS itself; the preconnects just warm those hosts. -->
+    <!-- Brand tokens (typefaces, palette) and the wordmark composition built
+         from them, both hosted for other properties under /brand/v1/ and
+         documented in brand/README.md. theme.css @imports the Google Fonts CSS
+         itself; the preconnects just warm those hosts. -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="brand/v1/theme.css" />
+    <link rel="stylesheet" href="brand/v1/wordmark.css" />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <main>
       <!--
         Wordmark. Until the logo (#1) lands, this is plain text in three parts
-        so each can be styled on its own. To swap in the SVG, replace the three
-        <span>s below with one line:
+        so each can be styled on its own. The sw- classes are the hosted
+        composition (brand/v1/wordmark.css); --brand asks for the coloured logo
+        treatment rather than currentColor, and .wordmark is this page's own
+        display sizing in style.css. There must be no whitespace between the
+        spans. To swap in the SVG, replace all three with one line:
           <img class="wordmark__mark" src="brand/v1/logo.svg" alt="sprue.works" />
       -->
-      <h1 class="wordmark"><span class="wordmark__sprue">sprue</span><span class="wordmark__dot">.</span><span class="wordmark__works">works</span></h1>
+      <h1 class="wordmark sw-wordmark sw-wordmark--brand"><span class="sw-wordmark__sprue">sprue</span><span class="sw-wordmark__dot">.</span><span class="sw-wordmark__works">works</span></h1>
     </main>
 
     <footer>

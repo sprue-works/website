@@ -10,17 +10,21 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link id="gf" rel="stylesheet" href="" />
     <link rel="stylesheet" href="/brand/v1/theme.css" />
+    <link rel="stylesheet" href="/brand/v1/wordmark.css" />
     <link rel="stylesheet" href="/style.css" />
     <style>
       /* Picker-only additions; the page above the strip is the real home.
-         These rules come after /style.css and set the same properties, so
-         they replace the baked wordmark styles (fonts, colours, scale,
-         tracking, dot gap) with the picker's --f-*, --w-*, --c-*, --xscale
-         and gap variables. Each span's letter-spacing is applied via a CSS
-         variable; trailing tracking is measured out of widths. */
-      .wordmark__sprue { color: var(--c-sprue); font-family: var(--f-sprue); font-weight: var(--w-sprue); font-variation-settings: var(--fvs-sprue, normal); letter-spacing: var(--ls-sprue, 0em); }
-      .wordmark__dot   { font-family: var(--f-dot);   font-weight: var(--w-dot);   font-variation-settings: var(--fvs-dot, normal);   font-size: calc(1em * var(--dscale, 1)); color: var(--c-dot); margin-left: var(--dot-before, 0em); margin-right: var(--dot-after, 0em); letter-spacing: 0; }
-      .wordmark__works { color: var(--c-works); font-family: var(--f-works); font-weight: var(--w-works); font-variation-settings: var(--fvs-works, normal); font-size: calc(1em * var(--xscale, 1)); letter-spacing: calc(var(--ls-works, 0em) + var(--pitch-ls, 0em) + var(--width-ls, 0em)); }
+         These rules come after /brand/v1/wordmark.css and set the same
+         properties on the same classes, so they replace the shipped wordmark
+         composition (fonts, scale, tracking, dot gap) and the home page's
+         colours with the picker's --f-*, --w-*, --c-*, --xscale and gap
+         variables. The <h1> therefore carries .sw-wordmark but not
+         .sw-wordmark--brand, whose higher specificity would pin the colours.
+         Each span's letter-spacing is applied via a CSS variable; trailing
+         tracking is measured out of widths. */
+      .sw-wordmark__sprue { color: var(--c-sprue); font-family: var(--f-sprue); font-weight: var(--w-sprue); font-variation-settings: var(--fvs-sprue, normal); letter-spacing: var(--ls-sprue, 0em); }
+      .sw-wordmark__dot   { font-family: var(--f-dot);   font-weight: var(--w-dot);   font-variation-settings: var(--fvs-dot, normal);   font-size: calc(1em * var(--dscale, 1)); color: var(--c-dot); margin-left: var(--dot-before, 0em); margin-right: var(--dot-after, 0em); letter-spacing: 0; }
+      .sw-wordmark__works { color: var(--c-works); font-family: var(--f-works); font-weight: var(--w-works); font-variation-settings: var(--fvs-works, normal); font-size: calc(1em * var(--xscale, 1)); letter-spacing: calc(var(--ls-works, 0em) + var(--pitch-ls, 0em) + var(--width-ls, 0em)); }
       main { padding-bottom: calc(var(--panel-h, 24rem) + 2rem); align-content: center; } /* --panel-h is the measured height of #picker; align-content keeps the sample under the wordmark on tall viewports */
       /* Sample body copy (#8): judges the Body and Code roles as running text.
          Kept visually secondary to the wordmark: measure-limited and coloured
@@ -76,7 +80,7 @@
   </head>
   <body>
     <main>
-      <h1 class="wordmark"><span class="wordmark__sprue">sprue</span><span class="wordmark__dot">.</span><span class="wordmark__works">works</span></h1>
+      <h1 class="wordmark sw-wordmark"><span class="sw-wordmark__sprue">sprue</span><span class="sw-wordmark__dot">.</span><span class="sw-wordmark__works">works</span></h1>
       <section id="sample" aria-label="Sample body text">
         <h2>Lorem ipsum dolor sit amet</h2>
         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis <a href="https://polyglot.sprue.works">nostrud exercitation</a> ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
@@ -280,8 +284,8 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
         // width: tracking on works so the ink width of "works" equals that of "sprue" (dot excluded)
         if (S.wd && (differs || S.lsS !== S.lsW)) {
           root.setProperty("--width-ls", widthLs.toFixed(4) + "em");
-          const worksPx = parseFloat(getComputedStyle(document.querySelector(".wordmark__works")).fontSize);
-          const delta = inkWidth(".wordmark__sprue") - inkWidth(".wordmark__works");
+          const worksPx = parseFloat(getComputedStyle(document.querySelector(".sw-wordmark__works")).fontSize);
+          const delta = inkWidth(".sw-wordmark__sprue") - inkWidth(".sw-wordmark__works");
           if (Math.abs(delta) > 0.05 && worksPx) { widthLs += delta / (4 * worksPx); root.setProperty("--width-ls", widthLs.toFixed(4) + "em"); } // 4 inter-letter gaps in "works"
         } else { widthLs = 0; root.setProperty("--width-ls", "0em"); }
 
