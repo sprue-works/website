@@ -12,6 +12,9 @@
    link, a heading, a nav item. Add .sw-wordmark--brand for the logo
    treatment, which colours each span from the theme's palette.
 
+   It also occupies its true width, so it sits in a line of text exactly as
+   the same words in the same faces would; see the margin on __works below.
+
    Markup: three spans inside any element, with no whitespace between them
    (the mark is one word, and a space between the spans would render).
 
@@ -57,6 +60,14 @@
      as wide as "sprue". Both are em-relative, so they hold at any size. */
   font-size: calc(1em * var(--sw-works-scale, 1.0368));
   letter-spacing: var(--sw-works-tracking, -0.0939em);
+  /* CSS applies letter-spacing after the final "s" too, which is not part of
+     the correction — the tracking was measured across the four gaps between
+     the five letters. Left in, it would eat that much space after the mark and
+     pull the next thing on the line closer than normal text sits. Give it
+     back, so the mark occupies its true width wherever it is embedded. The
+     margin resolves against this span's own font-size, as the tracking does,
+     so the two cancel exactly at any size and for any token value. */
+  margin-right: calc(-1 * var(--sw-works-tracking, -0.0939em));
 }
 
 /* ---- Brand colours -------------------------------------------------------

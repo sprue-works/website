@@ -21,10 +21,12 @@
          variables. The <h1> therefore carries .sw-wordmark but not
          .sw-wordmark--brand, whose higher specificity would pin the colours.
          Each span's letter-spacing is applied via a CSS variable; trailing
-         tracking is measured out of widths. */
+         tracking is measured out of widths, and given back as a margin the way
+         wordmark.css does, so the preview occupies the width the shipped mark
+         would. */
       .sw-wordmark__sprue { color: var(--c-sprue); font-family: var(--f-sprue); font-weight: var(--w-sprue); font-variation-settings: var(--fvs-sprue, normal); letter-spacing: var(--ls-sprue, 0em); }
       .sw-wordmark__dot   { font-family: var(--f-dot);   font-weight: var(--w-dot);   font-variation-settings: var(--fvs-dot, normal);   font-size: calc(1em * var(--dscale, 1)); color: var(--c-dot); margin-left: var(--dot-before, 0em); margin-right: var(--dot-after, 0em); letter-spacing: 0; }
-      .sw-wordmark__works { color: var(--c-works); font-family: var(--f-works); font-weight: var(--w-works); font-variation-settings: var(--fvs-works, normal); font-size: calc(1em * var(--xscale, 1)); letter-spacing: calc(var(--ls-works, 0em) + var(--pitch-ls, 0em) + var(--width-ls, 0em)); }
+      .sw-wordmark__works { color: var(--c-works); font-family: var(--f-works); font-weight: var(--w-works); font-variation-settings: var(--fvs-works, normal); font-size: calc(1em * var(--xscale, 1)); letter-spacing: calc(var(--ls-works, 0em) + var(--pitch-ls, 0em) + var(--width-ls, 0em)); margin-right: calc(-1 * (var(--ls-works, 0em) + var(--pitch-ls, 0em) + var(--width-ls, 0em))); }
       main { padding-bottom: calc(var(--panel-h, 24rem) + 2rem); align-content: center; } /* --panel-h is the measured height of #picker; align-content keeps the sample under the wordmark on tall viewports */
       /* Sample body copy (#8): judges the Body and Code roles as running text.
          Kept visually secondary to the wordmark: measure-limited and coloured
