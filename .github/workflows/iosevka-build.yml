@@ -1,0 +1,217 @@
+# Build the brand's Iosevka cuts from source (#15).
+#
+# The picker currently serves a third-party Iosevka build, because the session
+# that added it could not reach the Iosevka repository. This workflow is how we
+# get our own: it builds the widths we care about from the upstream source with
+# our own build plan, subsets them, and uploads the result as artifacts for
+# inspection before anything is committed.
+#
+# Two triggers, because GitHub only registers workflow_dispatch from the default
+# branch: until this file is on main, a push that touches it is the only way to
+# run it, so the file itself is the trigger and the inputs fall back to their
+# defaults. Nothing else in the site depends on this, and a build takes minutes
+# per style, so it never runs on an ordinary push.
+name: Build Iosevka
+
+on:
+  push:
+    paths:
+      - .github/workflows/iosevka-build.yml
+  workflow_dispatch:
+    inputs:
+      iosevka_ref:
+        description: Iosevka git ref to build (branch, tag or commit; blank = default branch)
+        required: false
+        default: ""
+      weights:
+        description: 'CSS weights to build, comma separated (e.g. "300,500" or "100,200,300,400,500,600,700,800,900")'
+        required: false
+        default: "300,500"
+      ligations:
+        description: 'Ligation set to inherit (e.g. default-calt, dlig, haskell, ml, python; "none" to build without)'
+        required: false
+        default: "default-calt"
+
+# This job installs and builds a third-party tree, whose npm lifecycle scripts
+# run arbitrary code on the runner. So it gets no token at all, and it does not
+# check this repository out: nothing here reads it, and a checkout would leave
+# credentials in .git/config for that code to find.
+permissions: {}
+
+concurrency:
+  group: iosevka-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    # A push carries no inputs, so every knob needs its default here too.
+    env:
+      IOSEVKA_REF: ${{ inputs.iosevka_ref || '' }}
+      WEIGHTS: ${{ inputs.weights || '300,500' }}
+      LIGATIONS: ${{ inputs.ligations || 'default-calt' }}
+      WORKFLOW_NAME: ${{ github.workflow }}
+      REF_NAME: ${{ github.ref_name }}
+    steps:
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+
+      - name: Clone Iosevka
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/be5invis/Iosevka.git iosevka
+          cd iosevka
+          if [ -n "$IOSEVKA_REF" ]; then
+            # Fetch rather than clone --branch, which resolves only branches and
+            # tags: this accepts the commit form the input documents too.
+            git fetch --depth 1 origin "$IOSEVKA_REF"
+            git checkout --detach FETCH_HEAD
+          fi
+          echo "IOSEVKA_VERSION=$(node -p 'require("./package.json").version')" >> "$GITHUB_ENV"
+          echo "IOSEVKA_COMMIT=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+          # The upstream commit's own date, used below to pin the fonts' build
+          # timestamps so a rebuild is byte-for-byte comparable.
+          echo "IOSEVKA_EPOCH=$(git log -1 --format=%ct)" >> "$GITHUB_ENV"
+          echo "Iosevka $(node -p 'require("./package.json").version') at $(git rev-parse --short HEAD)"
+
+      - name: Install build dependencies
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq && sudo apt-get install -y -qq ttfautohint || echo "ttfautohint unavailable; continuing"
+          cd iosevka && npm install --no-audit --no-fund
+
+      - name: Write the build plan
+        run: |
+          set -euo pipefail
+          # Two widths of one upright family. shape is the advance width in
+          # 1000ths of an em, which is the whole point: normal is 500 and the
+          # drawn Extended is 576, and any value between them is available here.
+          {
+            echo '[buildPlans.IosevkaSprue]'
+            echo 'family = "Iosevka Sprue"'
+            echo 'spacing = "normal"'
+            echo 'serifs = "sans"'
+            echo 'noCvSs = true'
+            echo 'exportGlyphNames = false'
+            echo
+            # Code ligatures. A set inherited here lands in calt, which is on by
+            # default in browsers and editors, so arrows and == come out ligated
+            # without the consumer opting in. "none" builds the plain forms.
+            if [ "$LIGATIONS" != "none" ]; then
+              echo '  [buildPlans.IosevkaSprue.ligations]'
+              echo "  inherits = \"$LIGATIONS\""
+              echo
+            fi
+            echo '  [buildPlans.IosevkaSprue.slopes.upright]'
+            echo '  angle = 0'
+            echo '  shape = "upright"'
+            echo '  menu  = "upright"'
+            echo '  css   = "normal"'
+            echo
+            echo '  [buildPlans.IosevkaSprue.widths.normal]'
+            echo '  shape = 500'
+            echo '  menu  = 5'
+            echo '  css   = "normal"'
+            echo
+            echo '  [buildPlans.IosevkaSprue.widths.extended]'
+            echo '  shape = 576'
+            echo '  menu  = 7'
+            echo '  css   = "expanded"'
+            echo
+            IFS=','
+            for w in $WEIGHTS; do
+              w=$(echo "$w" | tr -d ' ')
+              case "$w" in
+                100) name=thin ;; 200) name=extralight ;; 300) name=light ;;
+                400) name=regular ;; 500) name=medium ;; 600) name=semibold ;;
+                700) name=bold ;; 800) name=extrabold ;; 900) name=heavy ;;
+                *) echo "unknown weight $w" >&2; exit 1 ;;
+              esac
+              echo "  [buildPlans.IosevkaSprue.weights.$name]"
+              echo "  shape = $w"
+              echo "  menu  = $w"
+              echo "  css   = $w"
+              echo
+            done
+          } > iosevka/private-build-plans.toml
+          cat iosevka/private-build-plans.toml
+
+      - name: Build
+        run: |
+          set -euo pipefail
+          cd iosevka
+          # Target names have moved between Iosevka majors; try the webfont
+          # bundle first and fall back to the plain woff2 target.
+          npm run build -- webfont::IosevkaSprue || npm run build -- woff2::IosevkaSprue
+          echo "--- produced:"
+          find dist -name '*.woff2' | sort
+
+      - name: Subset to Latin and report metrics
+        run: |
+          set -euo pipefail
+          # Pinned: the woff2 encoder is part of the output, so its version
+          # belongs in the inputs that decide the bytes.
+          python3 -m pip install --quiet fonttools==4.65.0 brotli==1.2.0
+          mkdir -p out
+          U="U+0020-007E,U+00A0-00FF,U+2013,U+2014,U+2018-201A,U+201C-201E,U+2022,U+2026"
+          while IFS= read -r f; do
+            base=$(basename "$f" .woff2)
+            # Keep the ligature features: dropping them would subset away the
+            # very thing this build is for.
+            pyftsubset "$f" --unicodes="$U" --flavor=woff2 \
+              --layout-features='calt,liga,clig,dlig,kern' \
+              --no-hinting --desubroutinize --output-file="out/$base.woff2"
+          done < <(find iosevka/dist -name '*.woff2' | sort)
+          {
+            echo "Iosevka $IOSEVKA_VERSION at $IOSEVKA_COMMIT"
+            echo "built $(date -u +%FT%TZ) by $WORKFLOW_NAME on $REF_NAME"
+            echo
+            echo "ligations: $LIGATIONS"
+            echo
+            echo "timestamps pinned to the upstream commit's date ($IOSEVKA_EPOCH), so a"
+            echo "rebuild of the same commit and plan reproduces these bytes exactly."
+            echo
+            printf '%-40s %7s %7s %6s %7s %-9s %s\n' file advance xHeight upem bytes features sha256
+          } > out/MANIFEST.txt
+          python3 - <<'PY' >> out/MANIFEST.txt
+          import glob, hashlib, os
+          from fontTools.ttLib import TTFont
+          from fontTools.misc.timeTools import timestampSinceEpoch
+          # Iosevka stamps each face with the wall clock, which is the only thing
+          # that differs between two builds of the same commit and plan. Pin both
+          # dates to the upstream commit's own, and the output becomes
+          # reproducible: same commit and plan gives the same bytes, so a
+          # committed font's origin can be checked by rebuilding it.
+          epoch = timestampSinceEpoch(int(os.environ["IOSEVKA_EPOCH"]))
+          for f in sorted(glob.glob("out/*.woff2")):
+              t = TTFont(f)
+              # Without this, fontTools rewrites head.modified to the save time
+              # and the bytes depend on the clock, which is the whole problem.
+              t.recalcTimestamp = False
+              t["head"].created = t["head"].modified = epoch
+              t.flavor = "woff2"
+              t.save(f)
+          for f in sorted(glob.glob("out/*.woff2")):
+              t = TTFont(f)
+              adv = t["hmtx"]["x"][0] if "x" in t["hmtx"].metrics else -1
+              feats = sorted({r.FeatureTag for r in t["GSUB"].table.FeatureList.FeatureRecord}) if "GSUB" in t else []
+              lig = [x for x in ("calt", "liga", "dlig", "clig") if x in feats]
+              digest = hashlib.sha256(open(f, "rb").read()).hexdigest()[:16]
+              print(f'{os.path.basename(f):<40} {adv:>7} {getattr(t["OS/2"],"sxHeight",-1):>7} '
+                    f'{t["head"].unitsPerEm:>6} {os.path.getsize(f):>7} {",".join(lig) or "none":<9} {digest}')
+          PY
+          cat out/MANIFEST.txt
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: iosevka-sprue-subset
+          path: out/
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: iosevka-sprue-full
+          path: iosevka/dist/**/*.woff2
+          if-no-files-found: error
