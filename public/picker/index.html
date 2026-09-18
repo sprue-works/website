@@ -127,7 +127,8 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
         <label>Colour <select name="c_w" data-palette></select><output></output></label>
         <label>Match x-height <input type="checkbox" name="xh" /><output name="oxh"></output></label>
         <label>Match width <input type="checkbox" name="wd" /><output name="owd"></output></label>
-        <label id="wdbyrow" hidden>Match width by <select name="wd_by"><option value="ls">letter-spacing</option><option value="pitch">pitch (mono)</option><option value="stretch">pitch, stretched to x-height</option></select><output name="owdby"></output></label>
+        <label id="wdthrow" hidden>Width axis <input type="range" name="wdth" step="0.5" /><output name="owdth"></output></label>
+        <label id="wdbyrow" hidden>Match width by <select name="wd_by"><option value="ls">letter-spacing</option><option value="pitch">pitch (mono)</option><option value="stretch">pitch, stretched to x-height</option><option value="axis">width axis (drawn)</option></select><output name="owdby"></output></label>
         <label id="pitchrow" hidden>Match pitch (mono) <input type="checkbox" name="pitch" /><output name="opitch"></output></label>
       </fieldset>
       <fieldset>
@@ -155,7 +156,7 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
     </form>
 
     <script>
-      // family -> [source, minWeight, maxWeight, generic, fixedWeights?, axisSpec?]
+      // family -> [source, minWeight, maxWeight, generic, fixedWeights?, axisSpec?, wdth [min,max,default]?]
       // source is the Google Fonts family name, "@<slug>" for a Fontsource
       // package served from jsDelivr (faces Google Fonts doesn't carry), or a
       // path starting with "/" for faces served from this origin, where each
@@ -190,6 +191,10 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
         // 0.500em, at the same x-height) plus its own normal width for an
         // apples-to-apples comparison. See picker/fonts/iosevka-4.5/README.md
         // for provenance, the subsetting, and how to swap in our own build.
+        // Martian Mono (OFL, evilmartians/mono) carries a real drawn width axis: at every
+        // wdth its x-height holds at 0.600em while the advance runs 0.600em to 0.750em, so
+        // width can be matched by choosing a width rather than by tracking or a transform.
+        "Martian Mono":        ["Martian+Mono", 100, 800, "monospace", null, "wdth,wght@75..112.5,100..800", [75, 112.5, 112.5]],
         "Iosevka":             ["@iosevka", 100, 900, "monospace"],
         "Iosevka 4.5":          ["/picker/fonts/iosevka-4.5/normal", 100, 900, "monospace"],
         "Iosevka 4.5 Extended": ["/picker/fonts/iosevka-4.5/extended", 100, 900, "monospace"],
@@ -269,26 +274,33 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
       [S.fC, S.wC] = parse(q.get("code"), "IBM Plex Mono", 300);
       S.sample = q.get("sample") !== "0";
       S.xh = q.get("xh") !== "0"; S.wd = q.has("width") ? q.get("width") === "1" : true; S.pitch = q.get("pitch") !== "0";
-      S.wdBy = ["pitch", "stretch"].includes(q.get("widthby")) ? q.get("widthby") : "ls"; // how Match width fits "works": tracking, or (mono only) its pitch, or pitch in X with x-height in Y
-      let xscale = 1, dscale = 1, xstretch = 1, pitchLs = 0, widthLs = 0, measureTimer;
+      S.wdBy = ["pitch", "stretch", "axis"].includes(q.get("widthby")) ? q.get("widthby") : "ls";
+      S.wdthW = num("wdthw", NaN); // the works face's width axis; NaN until a face with one is picked // how Match width fits "works": tracking, or (mono only) its pitch, or pitch in X with x-height in Y
+      let xscale = 1, dscale = 1, xstretch = 1, pitchLs = 0, widthLs = 0, axisMaxed = false, measureTimer;
 
       for (const sel of [form.f_s, form.f_w, form.f_d, form.f_b, form.f_c]) for (const [name, [gf]] of Object.entries(FAMILIES)) if (gf || sel === form.f_b || sel === form.f_c) sel.add(new Option(name, name));
       for (const sel of form.querySelectorAll("select[data-palette]")) for (const [k, [name, hex]] of Object.entries(PALETTE)) { const o = new Option(`${name} ${hex}`, k); o.style.background = hex; o.style.color = k === "floral-white" || k === "royal-gold" || k === "muted-teal" ? "#251818" : "#fff7ed"; sel.add(o); }
       const snap = (fam, w) => { const [, lo, hi, , fixed] = FAMILIES[fam]; if (fixed) return fixed.reduce((a, b) => Math.abs(b - w) < Math.abs(a - w) ? b : a); return Math.min(hi, Math.max(lo, Math.round(w / 100) * 100)); };
       const stack = (fam) => !FAMILIES[fam][0] ? SYSTEM_UI : FAMILIES[fam][3] === "monospace" ? `"${fam}", ui-monospace, SFMono-Regular, Menlo, monospace` : `"${fam}", system-ui, -apple-system, "Segoe UI", ${FAMILIES[fam][3]}`;
-      const fvs = (fam) => fam === "Recursive" ? `"MONO" ${S.mono}, "CASL" ${S.casl}` : "normal";
+      const wdthAxis = (fam) => FAMILIES[fam][6];
+      const fvs = (fam, wdth) => {
+        const parts = [];
+        if (fam === "Recursive") parts.push(`"MONO" ${S.mono}`, `"CASL" ${S.casl}`);
+        if (wdthAxis(fam) && wdth != null) parts.push(`"wdth" ${+(+wdth).toFixed(2)}`);
+        return parts.length ? parts.join(", ") : "normal";
+      };
       const isMono = (fam) => FAMILIES[fam][3] === "monospace" || (fam === "Recursive" && S.mono >= 0.5);
 
       // ---- measurement (canvas, 100px, current variation axes) ----
       const ctx = document.createElement("canvas").getContext("2d");
-      const metric = (fam, w, fn) => {
+      const metric = (fam, w, fn, wdth) => {
         const face = `${w} 100px "${fam}"`;
         if (!document.fonts.check(face)) return null;
-        if ("fontVariationSettings" in ctx) ctx.fontVariationSettings = fvs(fam);
+        if ("fontVariationSettings" in ctx) ctx.fontVariationSettings = fvs(fam, wdth);
         ctx.font = face; return fn(ctx.measureText("x"));
       };
-      const xHeight = (fam, w) => metric(fam, w, (m) => m.actualBoundingBoxAscent);
-      const advance = (fam, w) => metric(fam, w, (m) => m.width);
+      const xHeight = (fam, w, wdth) => metric(fam, w, (m) => m.actualBoundingBoxAscent, wdth);
+      const advance = (fam, w, wdth) => metric(fam, w, (m) => m.width, wdth);
       const later = () => { clearTimeout(measureTimer); measureTimer = setTimeout(render, 150); };
       // Rendered width of a word span minus the trailing letter-spacing after its last glyph.
       const inkWidth = (sel) => { const el = document.querySelector(sel); const r = document.createRange(); r.selectNodeContents(el); return r.getBoundingClientRect().width - (parseFloat(getComputedStyle(el).letterSpacing) || 0); };
@@ -303,10 +315,12 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
         if (S.lockC !== "none") [S.fC, S.wC] = S.lockC === "body" ? [S.fB, S.wB] : role[S.lockC];
         S.wC = snap(S.fC, S.wC);
         for (const fam of [S.fS, S.fW, S.fD, S.fB, S.fC]) ensureFontsource(fam);
+        const wAx = wdthAxis(S.fW); // [min, max, default]
+        S.wdthW = wAx ? (Number.isFinite(S.wdthW) ? Math.min(wAx[1], Math.max(wAx[0], S.wdthW)) : wAx[2]) : NaN;
 
         // fonts
         root.setProperty("--f-sprue", stack(S.fS)); root.setProperty("--w-sprue", S.wS); root.setProperty("--fvs-sprue", fvs(S.fS)); root.setProperty("--ls-sprue", S.lsS + "em");
-        root.setProperty("--f-works", stack(S.fW)); root.setProperty("--w-works", S.wW); root.setProperty("--fvs-works", fvs(S.fW)); root.setProperty("--ls-works", S.lsW + "em");
+        root.setProperty("--f-works", stack(S.fW)); root.setProperty("--w-works", S.wW); root.setProperty("--fvs-works", fvs(S.fW, S.wdthW)); root.setProperty("--ls-works", S.lsW + "em");
         root.setProperty("--f-dot", stack(S.fD)); root.setProperty("--w-dot", S.wD); root.setProperty("--fvs-dot", fvs(S.fD));
         root.setProperty("--f-body", stack(S.fB)); root.setProperty("--w-body", S.wB); root.setProperty("--fvs-body", fvs(S.fB)); root.setProperty("--w-heading", S.wH);
         root.setProperty("--f-code", stack(S.fC)); root.setProperty("--w-code", S.wC); root.setProperty("--fvs-code", fvs(S.fC));
@@ -318,16 +332,21 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
         // tracking, so its five advances stay even. It owns the works scale, so it overrides x-height.
         const differs = S.fS !== S.fW || S.wS !== S.wW || S.fS === "Recursive";
         const matchW = S.wd && (differs || S.lsS !== S.lsW);
-        const pitchMode = S.wd && isMono(S.fW) && S.wdBy !== "ls";
+        const pitchMode = S.wd && isMono(S.fW) && ["pitch", "stretch"].includes(S.wdBy);
+        // Width by the face's own drawn width axis: the size still comes from x-height, and the
+        // width is solved by choosing a width, so pitch stays even and the strokes stay true.
+        const axisMode = S.wd && !!wAx && S.wdBy === "axis";
         // Y from x-height, X from pitch: a deliberate distortion, read the % before keeping it.
         // Not gated on differs: identical faces have an x-height ratio of 1, and the stretch still has work to do.
         const stretchMode = pitchMode && S.wdBy === "stretch" && S.xh;
-        document.getElementById("wdbyrow").hidden = !(S.wd && isMono(S.fW));
+        document.getElementById("wdbyrow").hidden = !(S.wd && (isMono(S.fW) || wAx));
+        document.getElementById("wdthrow").hidden = !wAx;
+        for (const o of form.wd_by.options) o.disabled = o.value === "axis" ? !wAx : o.value === "ls" ? false : !isMono(S.fW);
 
         // x-height: scale works so its lowercase x matches sprue's; the dot follows whichever side it locks to
-        xstretch = 1;
+        xstretch = 1; axisMaxed = false;
         if (pitchMode) {
-          if (stretchMode) { const a = xHeight(S.fS, S.wS), b = xHeight(S.fW, S.wW); if (a && b) xscale = a / b; else later(); }
+          if (stretchMode) { const a = xHeight(S.fS, S.wS), b = xHeight(S.fW, S.wW, S.wdthW); if (a && b) xscale = a / b; else later(); }
           root.setProperty("--pitch-ls", "0em"); root.setProperty("--width-ls", "0em"); root.setProperty("--xstretch", "1"); root.setProperty("--stretch-pad", "0em"); root.setProperty("--xscale", xscale.toFixed(4));
           const w = inkWidth(".sw-wordmark__works"), t = inkWidth(".sw-wordmark__sprue");
           if (!(w > 0 && t > 0)) { xscale = 1; later(); }
@@ -340,7 +359,7 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
             root.setProperty("--stretch-pad", px ? ((xstretch - 1) * w / px).toFixed(4) + "em" : "0em");
           }
           else xscale *= t / w;
-        } else if (S.xh && differs) { const a = xHeight(S.fS, S.wS), b = xHeight(S.fW, S.wW); if (a && b) xscale = a / b; else later(); } else xscale = 1;
+        } else if (S.xh && differs) { const a = xHeight(S.fS, S.wS), b = xHeight(S.fW, S.wW, S.wdthW); if (a && b) xscale = a / b; else later(); } else xscale = 1;
         dscale = S.lockD === "works" ? xscale : 1;
         root.setProperty("--xscale", xscale.toFixed(4)); root.setProperty("--dscale", dscale.toFixed(4)); root.setProperty("--xstretch", xstretch.toFixed(4));
         if (xstretch === 1) root.setProperty("--stretch-pad", "0em");
@@ -348,11 +367,39 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
         // pitch: two monos -> tracking on works so per-character advance matches sprue's (words only)
         const bothMono = isMono(S.fS) && isMono(S.fW) && (S.fS !== S.fW || S.wS !== S.wW || S.lsS !== S.lsW);
         document.getElementById("pitchrow").hidden = !bothMono;
-        if (S.pitch && bothMono && !S.wd) { const a = advance(S.fS, S.wS), b = advance(S.fW, S.wW); if (a && b) pitchLs = (a / 100 + S.lsS) / xscale - b / 100 - S.lsW; else later(); } else pitchLs = 0;
+        if (S.pitch && bothMono && !S.wd) { const a = advance(S.fS, S.wS), b = advance(S.fW, S.wW, S.wdthW); if (a && b) pitchLs = (a / 100 + S.lsS) / xscale - b / 100 - S.lsW; else later(); } else pitchLs = 0;
         root.setProperty("--pitch-ls", pitchLs.toFixed(4) + "em");
 
+        // width by axis: choose the works face's width so its ink width equals sprue's. Ink width
+        // is monotonic in wdth, so bisect it; each step writes the axis and re-measures, which is a
+        // synchronous layout, so this converges inside one render rather than over several.
+        if (axisMode) {
+          root.setProperty("--width-ls", "0em"); widthLs = 0;
+          let lo = wAx[0], hi = wAx[1], wd = S.wdthW, target = inkWidth(".sw-wordmark__sprue"), delta = 0;
+          for (let i = 0; i < 20; i++) {
+            root.setProperty("--fvs-works", fvs(S.fW, wd));
+            delta = target - inkWidth(".sw-wordmark__works");
+            if (Math.abs(delta) < 0.05) break;
+            if (delta > 0) lo = wd; else hi = wd;
+            const next = (lo + hi) / 2;
+            if (Math.abs(next - wd) < 1e-4) break; // bracket collapsed: as close as this axis gets
+            wd = next;
+          }
+          S.wdthW = wd; // delta always belongs to the value now in use
+          // Any width left over is closed with tracking, so "Match width" stays true to its name.
+          // Two different reasons to have some: the axis is pinned at an end, which happens when
+          // x-height matching has fixed a size no cut can span, or layout simply quantises finer
+          // than the axis can steer. Only the first is worth calling out.
+          if (Math.abs(delta) > 0.05) {
+            const worksPx = parseFloat(getComputedStyle(document.querySelector(".sw-wordmark__works")).fontSize);
+            if (worksPx) widthLs = delta / (4 * worksPx); // 4 inter-letter gaps in "works"
+            if (Math.abs(widthLs) < 0.0005) widthLs = 0;
+            root.setProperty("--width-ls", widthLs.toFixed(4) + "em");
+            axisMaxed = wd <= wAx[0] + 1e-3 || wd >= wAx[1] - 1e-3;
+          }
+        }
         // width: tracking on works so the ink width of "works" equals that of "sprue" (dot excluded)
-        if (matchW && !pitchMode) {
+        else if (matchW && !pitchMode) {
           root.setProperty("--width-ls", widthLs.toFixed(4) + "em");
           const worksPx = parseFloat(getComputedStyle(document.querySelector(".sw-wordmark__works")).fontSize);
           const delta = inkWidth(".sw-wordmark__sprue") - inkWidth(".sw-wordmark__works");
@@ -374,6 +421,7 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
         form.xh.checked = S.xh; form.xh.disabled = pitchMode && S.wdBy === "pitch";
         form.oxh.value = form.xh.disabled ? "(pitch sets size)" : S.xh && xscale !== 1 ? "×" + xscale.toFixed(3) : "";
         form.wd.checked = S.wd; form.owd.value = pitchMode && !stretchMode ? "×" + xscale.toFixed(3) : stretchMode ? "" : widthLs === 0 ? "" : (widthLs > 0 ? "+" : "") + widthLs.toFixed(3) + "em";
+        if (wAx) { form.wdth.min = wAx[0]; form.wdth.max = wAx[1]; form.wdth.value = S.wdthW; form.wdth.disabled = axisMode; form.owdth.value = S.wdthW.toFixed(1) + (axisMode ? (axisMaxed ? (S.wdthW >= wAx[1] ? " (widest, tracking helps)" : " (narrowest, tracking helps)") : " (matched)") : S.wdthW === wAx[2] ? " (default)" : ""); }
         const stretchPct = (xstretch - 1) * 100;
         form.wd_by.value = S.wdBy; form.owdby.value = xstretch === 1 ? "" : `X ${stretchPct > 0 ? "+" : ""}${stretchPct.toFixed(1)}%` + (Math.abs(stretchPct) > 10 ? " (heavy)" : "");
         form.pitch.checked = S.pitch; form.pitch.disabled = S.wd; form.opitch.value = pitchLs === 0 ? "" : (pitchLs > 0 ? "+" : "") + pitchLs.toFixed(3) + "em";
@@ -389,7 +437,7 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
         if (!S.sample) p.set("sample", "0");
         if (S.dotB) p.set("dotb", S.dotB.toFixed(3)); if (S.dotA) p.set("dota", S.dotA.toFixed(3));
         if (rec) { p.set("mono", S.mono.toFixed(2)); p.set("casl", S.casl.toFixed(2)); }
-        if (!S.xh) p.set("xh", "0"); p.set("width", S.wd ? "1" : "0"); if (S.wdBy !== "ls") p.set("widthby", S.wdBy); if (!S.pitch) p.set("pitch", "0");
+        if (!S.xh) p.set("xh", "0"); p.set("width", S.wd ? "1" : "0"); if (S.wdBy !== "ls") p.set("widthby", S.wdBy); if (Number.isFinite(S.wdthW) && (axisMode || S.wdthW !== wAx[2])) p.set("wdthw", S.wdthW.toFixed(1)); if (!S.pitch) p.set("pitch", "0");
         history.replaceState(null, "", "?" + p);
         document.getElementById("url").textContent = location.href;
       }
@@ -403,7 +451,7 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
       bind("c_s", (e) => { S.cS = e.value; }); bind("c_d", (e) => { S.cD = e.value; }); bind("c_w", (e) => { S.cW = e.value; }); bind("c_bg", (e) => { S.cBg = e.value; });
       bind("dotb", (e) => { S.dotB = +e.value; }); bind("dota", (e) => { S.dotA = +e.value; });
       bind("mono", (e) => { S.mono = +e.value; }); bind("casl", (e) => { S.casl = +e.value; });
-      bind("xh", (e) => { S.xh = e.checked; }); bind("wd", (e) => { S.wd = e.checked; widthLs = 0; }); bind("wd_by", (e) => { S.wdBy = e.value; widthLs = 0; xscale = 1; }); bind("pitch", (e) => { S.pitch = e.checked; });
+      bind("xh", (e) => { S.xh = e.checked; }); bind("wd", (e) => { S.wd = e.checked; widthLs = 0; }); bind("wd_by", (e) => { S.wdBy = e.value; widthLs = 0; xscale = 1; }); bind("wdth", (e) => { S.wdthW = +e.value; }); bind("pitch", (e) => { S.pitch = e.checked; });
       const toggle = () => document.body.classList.toggle("hide-picker");
       document.getElementById("hide").onclick = toggle;
       addEventListener("keydown", (e) => { if (e.key === "h" && document.activeElement.tagName !== "SELECT") toggle(); });
