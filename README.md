@@ -120,20 +120,28 @@ hand.
 The wordmark is plain text until the logo (#1) lands: three spans (`sprue`, the
 dot, `works`) so each can be styled on its own; swapping in the SVG is a
 one-line change described in the comment above the `<h1>` in
-`public/index.html`.
+`public/index.html`. The rules that compose those spans are hosted too, at
+`public/brand/v1/wordmark.css` (https://sprue.works/brand/v1/wordmark.css), as
+the `sw-wordmark` classes the `<h1>` carries: colour and size are inherited, so
+any property can drop the mark into a link or a heading at whatever size and
+colour surrounds it, and `sw-wordmark--brand` asks for the coloured logo
+treatment. `public/style.css` keeps only this page's display sizing of it.
 
 Typefaces and colours were chosen with the interactive picker, which now lives
 at `public/picker/index.html`, served unlinked and `noindex`ed at
 https://sprue.works/picker (a tool, not a page of the site; it loads extra
-Google Fonts families from the same host the theme already uses). Below
-the wordmark it renders sample body copy and a code snippet in separately
-chosen Body and Code faces, so candidates can be judged as running text and
-not only as display type. They are
-defined once, as `--sw-*` custom properties in the hosted brand theme
+Google Fonts families from the same host the theme already uses). Below the
+wordmark it renders sample body copy and a code snippet in separately chosen
+Body and Code faces, so candidates can be judged as running text and not only
+as display type. It marks up the wordmark with the same `sw-wordmark` classes
+the home page uses and overrides them from its own variables, so there is one
+set of class names across the site. Typefaces and colours are defined once, as
+`--sw-*` custom properties in the hosted brand theme
 `public/brand/v1/theme.css` (served at https://sprue.works/brand/v1/theme.css
 with a long immutable cache via `public/_headers`); `public/style.css` only
-composes those variables. Other sprue.works properties link the same file; see
-`brand/README.md` for the consumer snippet, the variable list, and the
-versioning rule. The page follows the OS colour scheme: Floral White
-background with Coffee Bean / Pine Teal / Rust Brown text in light mode, Coffee
-Bean background with Floral White / Muted Teal / Pumpkin Spice in dark mode.
+composes those variables. Other sprue.works properties link the same files;
+see `brand/README.md` for the consumer snippets, the variable list, the
+wordmark classes, and the versioning rule. The page follows the OS colour
+scheme: Floral White background with Coffee Bean / Pine Teal / Rust Brown text
+in light mode, Coffee Bean background with Floral White / Muted Teal / Pumpkin
+Spice in dark mode.
