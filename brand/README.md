@@ -3,13 +3,13 @@
 Two hosted stylesheets, so any sprue.works property can use the brand with no
 tooling:
 
-    https://sprue.works/brand/v1/theme.css     colours and typefaces as tokens
-    https://sprue.works/brand/v1/wordmark.css  the wordmark built from them
+    https://sprue.works/brand/v2/theme.css     colours and typefaces as tokens
+    https://sprue.works/brand/v2/wordmark.css  the wordmark built from them
 
-The sources are `public/brand/v1/theme.css` and `public/brand/v1/wordmark.css`
+The sources are `public/brand/v2/theme.css` and `public/brand/v2/wordmark.css`
 in this repo (the site has no build step, so the served files are the sources).
-Other brand assets will sit next to them under `/brand/v1/`, e.g. the logo at
-`/brand/v1/logo.svg` once #1 lands.
+Other brand assets will sit next to them under `/brand/v2/`, e.g. the logo at
+`/brand/v2/logo.svg` once #1 lands.
 
 ## Use the theme
 
@@ -18,7 +18,7 @@ Paste into `<head>`, before your own stylesheet:
 ```html
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="stylesheet" href="https://sprue.works/brand/v1/theme.css" />
+<link rel="stylesheet" href="https://sprue.works/brand/v2/theme.css" />
 <style>
   body {
     background: var(--sw-bg, #fff7ed);
@@ -61,18 +61,28 @@ Type:
 
 | Variable | Value |
 |---|---|
-| `--sw-font-body` | system UI stack |
-| `--sw-font-mono` | IBM Plex Mono, monospace fallbacks |
+| `--sw-font-body` / `--sw-weight-body` | Quicksand / 600 |
+| `--sw-weight-heading` | 700 |
+| `--sw-font-mono` / `--sw-weight-code` | Iosevka Sprue / 500 |
 | `--sw-font-sprue` / `--sw-weight-sprue` | Quicksand / 700 |
 | `--sw-font-dot` / `--sw-weight-dot` | Nunito / 300 |
-| `--sw-font-works` / `--sw-weight-works` | IBM Plex Mono / 300 |
+| `--sw-font-works` / `--sw-weight-works` | Iosevka Sprue / 200 |
 | `--sw-dot-gap-after`, `--sw-works-scale`, `--sw-works-tracking` | wordmark optical corrections |
 | `--sw-text-xs` … `--sw-text-4xl` | 0.75 / 0.875 / 1 / 1.125 / 1.25 / 1.5 / 2 / 2.5 rem |
 | `--sw-leading-tight` / `--sw-leading-normal` | 1.2 / 1.5 |
 
+Two families at four weights: Quicksand sets "sprue", headings and body copy,
+and Iosevka Sprue sets "works" and code. Iosevka Sprue is our own build of
+Iosevka (SIL Open Font License 1.1, ligatures on by default), served from
+`/brand/v2/fonts/` because no CDN carries it; `public/picker/fonts/
+iosevka-sprue-34.8.1-run10/README.md` records the build and how to reproduce it.
+
 Swapping a typeface is a two-part change in `theme.css`: the `--sw-font-*`
-token and the family list in the `@import` at the top, since the token alone
-does not load a webfont.
+token, and the face itself — the family list in the `@import` for a Google
+font, or an `@font-face` for one we serve. The token alone loads nothing.
+Changing the face or weight of either wordmark half also invalidates
+`--sw-works-scale` and `--sw-works-tracking`, which are measured for one
+specific pairing with the picker at `/picker`.
 
 Spacing `--sw-space-1` … `--sw-space-8` (0.25, 0.5, 0.75, 1, 1.5, 2, 3, 4 rem)
 and radii `--sw-radius-sm` / `-md` / `-lg` / `-full` (2px, 4px, 8px, pill).
@@ -84,8 +94,8 @@ no property has to copy them. Link it after the theme, which is what loads the
 webfonts, and write the three spans with **no whitespace between them**:
 
 ```html
-<link rel="stylesheet" href="https://sprue.works/brand/v1/theme.css" />
-<link rel="stylesheet" href="https://sprue.works/brand/v1/wordmark.css" />
+<link rel="stylesheet" href="https://sprue.works/brand/v2/theme.css" />
+<link rel="stylesheet" href="https://sprue.works/brand/v2/wordmark.css" />
 
 <a class="sw-wordmark" href="https://sprue.works"><span class="sw-wordmark__sprue">sprue</span><span class="sw-wordmark__dot">.</span><span class="sw-wordmark__works">works</span></a>
 ```
@@ -108,7 +118,7 @@ follows the light/dark scheme:
 | `.sw-wordmark` | keeps the mark on one line, resets inherited letter-spacing, and sets it left to right as a bidi isolate |
 | `.sw-wordmark__sprue` | Quicksand 700 |
 | `.sw-wordmark__dot` | Nunito 300, pulled `--sw-dot-gap-after` closer to "works" |
-| `.sw-wordmark__works` | IBM Plex Mono 300, scaled and tracked to match "sprue", with the tracking's trailing edge given back |
+| `.sw-wordmark__works` | Iosevka Sprue 200, scaled and tracked to match "sprue", with the tracking's trailing edge given back |
 | `.sw-wordmark--brand` | modifier: colours the three spans from the palette |
 
 Every value comes from a `--sw-*` token with the token's own value as a literal
@@ -130,16 +140,17 @@ being pulled to the wrong side of it.
 
 ## Versioning and caching
 
-Everything under `/brand/v1/` is cached with `Cache-Control: public,
-max-age=31536000, immutable` (see the `/brand/*` rule in `public/_headers`).
-The rule, for both files:
+Everything under `/brand/*` is cached with `Cache-Control: public,
+max-age=31536000, immutable` (see the rule in `public/_headers`). A browser
+holding one of these files will not ask for it again for a year, and no later
+header, shorter TTL or purge reaches that copy. So the rule is simple:
 
-- **Additive** changes (a new token or class, an adjusted value) stay in v1.
-  Because of the immutable cache, repeat visitors of a consumer pick them up
-  only when their cached copy expires, so treat value changes as slow to roll
-  out.
-- **Breaking** changes (renaming or removing a token or a class) ship as
-  `/brand/v2/`; v1 keeps serving unchanged.
+- **A served file never changes.** Any change to its contents, additive or
+  not, ships under a new version directory, and the old one keeps serving
+  exactly what it did.
+- **v2** is the current version: Quicksand body and headings, and Iosevka
+  Sprue for the wordmark's "works" and for code, self-hosted in `v2/fonts/`.
+  **v1** is the IBM Plex Mono brand as it first shipped, frozen.
 
 The home page at https://sprue.works is the first consumer of both:
 `public/style.css` reads every colour and typeface from the theme's variables
