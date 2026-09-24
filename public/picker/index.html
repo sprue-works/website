@@ -195,7 +195,7 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
         // Martian Mono (OFL, evilmartians/mono) carries a real drawn width axis: at every
         // wdth its x-height holds at 0.600em while the advance runs 0.600em to 0.750em, so
         // width can be matched by choosing a width rather than by tracking or a transform.
-        "Martian Mono":        ["Martian+Mono", 100, 800, "monospace", null, "wdth,wght@75..112.5,100..800", [75, 112.5, 112.5]],
+        "Martian Mono":        ["Martian+Mono", 100, 800, "monospace", null, "wdth,wght@75..112.5,100..800", [75, 112.5, 100]],
         "Iosevka":             ["@iosevka", 100, 900, "monospace"],
         // Our own build (34.8.1, ligatures, x-height 520). The two 4.5 entries are the
         // third-party build it replaces, kept for comparison; see each directory's README.
@@ -331,7 +331,8 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
       // here (Martian Mono) holds constant across wdth, but not for the advance, which
       // is what wdth changes: read that from an off-screen span carrying the settings.
       const probe = Object.assign(document.createElement("span"), { textContent: "x".repeat(10) });
-      probe.style.cssText = `position:absolute;left:-99999px;top:0;white-space:pre;font-size:${MEASURE_PX}px`;
+      // Fixed and zero-height, so its 1000px line box adds no scrollable overflow to the page.
+      probe.style.cssText = `position:fixed;left:0;top:0;height:0;overflow:hidden;visibility:hidden;white-space:pre;font-size:${MEASURE_PX}px`;
       document.body.appendChild(probe);
       const xHeight = (fam, w) => metric(fam, w, (m) => m.actualBoundingBoxAscent);
       const advance = (fam, w, wdth) => metric(fam, w, () => {
@@ -358,9 +359,9 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
         // fonts
         root.setProperty("--f-sprue", stack(S.fS)); root.setProperty("--w-sprue", S.wS); root.setProperty("--fvs-sprue", fvs(S.fS)); root.setProperty("--ls-sprue", S.lsS + "em");
         root.setProperty("--f-works", stack(S.fW)); root.setProperty("--w-works", S.wW); root.setProperty("--fvs-works", fvs(S.fW, S.wdthW)); root.setProperty("--ls-works", S.lsW + "em");
-        root.setProperty("--f-dot", stack(S.fD)); root.setProperty("--w-dot", S.wD); root.setProperty("--fvs-dot", fvs(S.fD));
-        root.setProperty("--f-body", stack(S.fB)); root.setProperty("--w-body", S.wB); root.setProperty("--fvs-body", fvs(S.fB)); root.setProperty("--w-heading", S.wH);
-        root.setProperty("--f-code", stack(S.fC)); root.setProperty("--w-code", S.wC); root.setProperty("--fvs-code", fvs(S.fC));
+        root.setProperty("--f-dot", stack(S.fD)); root.setProperty("--w-dot", S.wD);
+        root.setProperty("--f-body", stack(S.fB)); root.setProperty("--w-body", S.wB);  root.setProperty("--w-heading", S.wH);
+        root.setProperty("--f-code", stack(S.fC)); root.setProperty("--w-code", S.wC); 
         document.body.classList.toggle("hide-sample", !S.sample);
         root.setProperty("--c-sprue", PALETTE[S.cS][1]); root.setProperty("--c-dot", PALETTE[S.cD][1]); root.setProperty("--c-works", PALETTE[S.cW][1]); root.setProperty("--sw-bg", PALETTE[S.cBg][1]);
         root.setProperty("--dot-before", S.dotB + "em"); root.setProperty("--dot-after", S.dotA + "em");
@@ -375,7 +376,7 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
         const axisMode = S.wd && !!wAx && S.wdBy === "axis";
         // Y from x-height, X from pitch: a deliberate distortion, read the % before keeping it.
         // Not gated on differs: identical faces have an x-height ratio of 1, and the stretch still has work to do.
-        const stretchMode = pitchMode && S.wdBy === "stretch" && S.xh;
+        const stretchMode = pitchMode && S.wdBy === "stretch"; // x-height is what it stretches to, so it is always on here
         document.getElementById("wdbyrow").hidden = !(S.wd && (isMono(S.fW) || wAx));
         document.getElementById("wdthrow").hidden = !wAx;
         for (const o of form.wd_by.options) o.disabled = o.value === "axis" ? !wAx : o.value === "ls" ? false : !isMono(S.fW);
@@ -422,7 +423,11 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
             if (Math.abs(next - wd) < 1e-4) break; // bracket collapsed: as close as this axis gets
             wd = next;
           }
-          S.wdthW = wd; // delta always belongs to the value now in use
+          // The loop can end on a width it chose but never measured (steps exhausted), so apply
+          // and measure the final value once more: the tracking below must belong to it.
+          root.setProperty("--fvs-works", fvs(S.fW, wd));
+          delta = target - inkWidth(".sw-wordmark__works");
+          S.wdthW = wd;
           // Any width left over is closed with tracking, so "Match width" stays true to its name.
           // Two different reasons to have some: the axis is pinned at an end, which happens when
           // x-height matching has fixed a size no cut can span, or layout simply quantises finer
@@ -442,6 +447,11 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
           const delta = inkWidth(".sw-wordmark__sprue") - inkWidth(".sw-wordmark__works");
           if (Math.abs(delta) > 0.05 && worksPx) { widthLs += delta / (4 * worksPx); root.setProperty("--width-ls", widthLs.toFixed(4) + "em"); } // 4 inter-letter gaps in "works"
         } else { widthLs = 0; root.setProperty("--width-ls", "0em"); }
+
+        // A role set in the works family is set at the works width too: the dot, body or code
+        // that follows "works" should not render its face at a different width from it.
+        const fvsRole = (fam) => fvs(fam, fam === S.fW ? S.wdthW : undefined);
+        root.setProperty("--fvs-dot", fvsRole(S.fD)); root.setProperty("--fvs-body", fvsRole(S.fB)); root.setProperty("--fvs-code", fvsRole(S.fC));
 
         // controls
         const setRange = (el, fam, w) => { el.min = FAMILIES[fam][1]; el.max = FAMILIES[fam][2]; el.value = w; };
@@ -463,8 +473,8 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
         setRange(form.w_c, S.fC, S.wC); form.w_c.disabled = S.lockC !== "none" && !S.ownWC; form.ow_c.value = S.wC;
         form.c_s.value = S.cS; form.c_d.value = S.cD; form.c_w.value = S.cW; form.c_bg.value = S.cBg;
         form.dotb.value = S.dotB; form.dota.value = S.dotA; form.odotb.value = S.dotB.toFixed(3) + "em"; form.odota.value = S.dotA.toFixed(3) + "em";
-        form.xh.checked = S.xh; form.xh.disabled = pitchMode && S.wdBy === "pitch";
-        form.oxh.value = form.xh.disabled ? "(pitch sets size)" : S.xh && xscale !== 1 ? "×" + xscale.toFixed(3) : "";
+        form.xh.checked = S.xh || stretchMode; form.xh.disabled = pitchMode;
+        form.oxh.value = pitchMode && !stretchMode ? "(pitch sets size)" : S.xh && xscale !== 1 ? "×" + xscale.toFixed(3) : "";
         form.wd.checked = S.wd; form.owd.value = pitchMode && !stretchMode ? "×" + xscale.toFixed(3) : stretchMode ? "" : widthLs === 0 ? "" : (widthLs > 0 ? "+" : "") + widthLs.toFixed(3) + "em";
         if (wAx) { form.wdth.min = wAx[0]; form.wdth.max = wAx[1]; form.wdth.value = S.wdthW; form.wdth.disabled = axisMode; form.owdth.value = S.wdthW.toFixed(1) + (axisMode ? (axisMaxed ? (S.wdthW >= wAx[1] ? " (widest, tracking helps)" : " (narrowest, tracking helps)") : " (matched)") : S.wdthW === wAx[2] ? " (default)" : ""); }
         const stretchPct = (xstretch - 1) * 100;

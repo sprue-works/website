@@ -71,11 +71,12 @@ Type:
 | `--sw-text-xs` … `--sw-text-4xl` | 0.75 / 0.875 / 1 / 1.125 / 1.25 / 1.5 / 2 / 2.5 rem |
 | `--sw-leading-tight` / `--sw-leading-normal` | 1.2 / 1.5 |
 
-Two families at four weights: Quicksand sets "sprue", headings and body copy,
-and Iosevka Sprue sets "works" and code. Iosevka Sprue is our own build of
-Iosevka (SIL Open Font License 1.1, ligatures on by default), served from
-`/brand/v2/fonts/` because no CDN carries it; `public/picker/fonts/
-iosevka-sprue-34.8.1-run10/README.md` records the build and how to reproduce it.
+Three families: Quicksand sets "sprue", headings and body copy; Iosevka Sprue
+sets "works" and code; Nunito sets only the wordmark's dot. Iosevka Sprue is
+our own build of Iosevka (SIL Open Font License 1.1, ligatures on by default),
+served from `/brand/v2/fonts/` because no CDN carries it;
+`public/picker/fonts/iosevka-sprue-34.8.1-run10/README.md` records the build
+and how to reproduce it.
 
 Swapping a typeface is a two-part change in `theme.css`: the `--sw-font-*`
 token, and the face itself — the family list in the `@import` for a Google

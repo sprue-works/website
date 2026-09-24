@@ -47,8 +47,9 @@
 
 :root {
   /* Type stack. Body copy is Quicksand, the wordmark's own "sprue" face, and
-     the mono face is the wordmark's "works" face, so the page is two families
-     used at four weights rather than four families. */
+     the mono face is the wordmark's "works" face: Quicksand at 600 and 700,
+     Iosevka Sprue at 200 and 500. The third family, Nunito 300, sets only the
+     wordmark's dot. */
   --sw-font-body: "Quicksand", system-ui, -apple-system, "Segoe UI", sans-serif;
   --sw-weight-body: 600;
   --sw-weight-heading: 700;
