@@ -1,8 +1,8 @@
 /* Composition only. Every colour and typeface is a --sw-* token from the
    hosted brand theme, and the wordmark itself is the hosted composition of
    those tokens; both are linked before this file in index.html:
-     /brand/v1/theme.css     (source: public/brand/v1/theme.css)
-     /brand/v1/wordmark.css  (source: public/brand/v1/wordmark.css)
+     /brand/v2/theme.css     (source: public/brand/v2/theme.css)
+     /brand/v2/wordmark.css  (source: public/brand/v2/wordmark.css)
    Docs for both: brand/README.md. No fallbacks here on purpose: those files
    are same-origin, so if they fail to load this one has failed too. External
    consumers add their own. */
@@ -26,6 +26,7 @@ body {
   background: var(--sw-bg);
   color: var(--sw-fg);
   font-family: var(--sw-font-body);
+  font-weight: var(--sw-weight-body);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -39,7 +40,7 @@ main {
 
 /* ---- Wordmark ----
    The mark itself — faces, weights, dot gap, works scale and tracking, and
-   the --brand colours — is .sw-wordmark in /brand/v1/wordmark.css, which the
+   the --brand colours — is .sw-wordmark in /brand/v2/wordmark.css, which the
    <h1> carries alongside the class below. All that is left here is this
    page's display treatment of it: how large it is and where it sits. */
 .wordmark {

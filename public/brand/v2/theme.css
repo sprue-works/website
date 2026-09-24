@@ -1,0 +1,153 @@
+/* sprue.works brand theme, v2
+   https://sprue.works/brand/v2/theme.css
+
+   Design tokens: CSS custom properties on :root, plus the two things they need
+   to work, a Google Fonts @import for the typefaces and color-scheme on :root
+   so form controls follow the palette. No element is styled. Every token is
+   prefixed --sw- so it cannot collide with a consumer's own variables. Usage,
+   the variable list, and the versioning rule live in brand/README.md in the
+   sprue-works/website repository.
+
+   Versioning: this file is served with a year-long immutable Cache-Control,
+   so a browser holding it never asks again and a change could not reach it.
+   It therefore never changes: any change, additive or not, ships as the next
+   version (/brand/v3/), and v1 (the IBM Plex Mono brand) stays frozen too. */
+
+/* ---- Typefaces -----------------------------------------------------------
+   The webfonts are pulled in here so a consumer needs nothing but the <link>.
+   Quicksand carries the wordmark's "sprue" at 700 and body copy at 600 with
+   headings at 700; Nunito draws the dot at 300. */
+@import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@600;700&family=Nunito:wght@300&display=swap");
+
+/* The mono is Iosevka Sprue: our own build of Iosevka 34.8.1, the drawn
+   Extended cut, served from this origin rather than a CDN because no CDN
+   carries it. 200 sets the wordmark's "works", 500 sets code, and the two
+   weights are one voice at two strengths. The files carry the SIL Open Font
+   License 1.1 (fonts/OFL.txt) and the calt/dlig ligature set, so ->, =>, !=,
+   <= and >= ligate in code without the consumer asking. The URLs are relative
+   to this stylesheet, not to the page: CSS resolves them against the
+   stylesheet's own URL, so a consumer on another origin still fetches them
+   from sprue.works, and /brand/* carries an open CORS header, which a
+   cross-origin font fetch requires. The build is in the file name: /brand/v2/
+   is cached immutably, so a new build is a new file, never a replacement. */
+@font-face {
+  font-family: "Iosevka Sprue";
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+  src: url("fonts/iosevka-sprue-34.8.1-run10-extended-200.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Iosevka Sprue";
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  src: url("fonts/iosevka-sprue-34.8.1-run10-extended-500.woff2") format("woff2");
+}
+
+:root {
+  /* Type stack. Body copy is Quicksand, the wordmark's own "sprue" face, and
+     the mono face is the wordmark's "works" face: Quicksand at 600 and 700,
+     Iosevka Sprue at 200 and 500. The third family, Nunito 300, sets only the
+     wordmark's dot. */
+  --sw-font-body: "Quicksand", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --sw-weight-body: 600;
+  --sw-weight-heading: 700;
+  --sw-font-mono: "Iosevka Sprue", ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* Code is the same face as the wordmark's "works", set heavier: the mark is
+     ExtraLight, code is Medium. */
+  --sw-weight-code: 500;
+
+  /* Wordmark faces: sprue . works. Changing one means changing its loader
+     too (the @import above for sprue and the dot, the @font-face rules for
+     works), re-measuring the corrections below with the picker, and carrying
+     the new values into the literal fallbacks in wordmark.css and the
+     picker's defaults, which repeat them for consumers without this file. */
+  --sw-font-sprue: "Quicksand", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --sw-weight-sprue: 700;
+  --sw-font-dot: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --sw-weight-dot: 300;
+  --sw-font-works: var(--sw-font-mono);
+  --sw-weight-works: 200;
+  /* Optical corrections measured with the picker (2026-09-20, Iosevka Sprue
+     Extended 200 against Quicksand 700): the dot is pulled 0.035em closer to
+     "works"; "works" is scaled so its x-height matches Quicksand's and tracked
+     so the word is as wide as "sprue". Both belong to this pairing -- a change
+     of face or weight on either side means measuring them again. */
+  --sw-dot-gap-after: -0.035em;
+  --sw-works-scale: 1.0294;
+  --sw-works-tracking: -0.059em;
+
+  /* Type scale (rem) and leading. */
+  --sw-text-xs: 0.75rem;
+  --sw-text-sm: 0.875rem;
+  --sw-text-md: 1rem;
+  --sw-text-lg: 1.125rem;
+  --sw-text-xl: 1.25rem;
+  --sw-text-2xl: 1.5rem;
+  --sw-text-3xl: 2rem;
+  --sw-text-4xl: 2.5rem;
+  --sw-leading-tight: 1.2;
+  --sw-leading-normal: 1.5;
+
+  /* Spacing and radii. */
+  --sw-space-1: 0.25rem;
+  --sw-space-2: 0.5rem;
+  --sw-space-3: 0.75rem;
+  --sw-space-4: 1rem;
+  --sw-space-5: 1.5rem;
+  --sw-space-6: 2rem;
+  --sw-space-7: 3rem;
+  --sw-space-8: 4rem;
+  --sw-radius-sm: 2px;
+  --sw-radius-md: 4px;
+  --sw-radius-lg: 8px;
+  --sw-radius-full: 9999px;
+
+  /* ---- Palette (coolors.co/palette/c2571b-f97316-134e4a-f9dc5c-fff7ed-7fc6a4-904114-251818) */
+  --sw-bronze-spice: #c2571b;
+  --sw-pumpkin-spice: #f97316;
+  --sw-pine-teal: #134e4a;
+  --sw-royal-gold: #f9dc5c;
+  --sw-floral-white: #fff7ed;
+  --sw-muted-teal: #7fc6a4;
+  --sw-rust-brown: #904114;
+  --sw-coffee-bean: #251818;
+
+  /* Semantic colours, light scheme (default). */
+  --sw-bg: var(--sw-floral-white);
+  --sw-fg: var(--sw-coffee-bean);
+  --sw-muted: #7d6e69; /* refined via color-mix() in the @supports block below */
+  --sw-accent: var(--sw-rust-brown);
+  --sw-color-sprue: var(--sw-coffee-bean);
+  --sw-color-dot: var(--sw-pine-teal);
+  --sw-color-works: var(--sw-rust-brown);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --sw-bg: var(--sw-coffee-bean);
+    --sw-fg: var(--sw-floral-white);
+    --sw-muted: #9d938d;
+    --sw-accent: var(--sw-pumpkin-spice);
+    --sw-color-sprue: var(--sw-floral-white);
+    --sw-color-dot: var(--sw-muted-teal);
+    --sw-color-works: var(--sw-pumpkin-spice);
+    color-scheme: dark;
+  }
+}
+
+/* A custom property accepts any tokens, so a second declaration is not a
+   fallback for it: the color-mix() value would win even where color-mix() is
+   unsupported and var(--sw-muted) would then be invalid. Gate the mix. */
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  :root {
+    --sw-muted: color-mix(in srgb, var(--sw-coffee-bean) 60%, var(--sw-floral-white));
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --sw-muted: color-mix(in srgb, var(--sw-floral-white) 55%, var(--sw-coffee-bean));
+    }
+  }
+}

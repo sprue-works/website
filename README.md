@@ -121,7 +121,7 @@ The wordmark is plain text until the logo (#1) lands: three spans (`sprue`, the
 dot, `works`) so each can be styled on its own; swapping in the SVG is a
 one-line change described in the comment above the `<h1>` in
 `public/index.html`. The rules that compose those spans are hosted too, at
-`public/brand/v1/wordmark.css` (https://sprue.works/brand/v1/wordmark.css), as
+`public/brand/v2/wordmark.css` (https://sprue.works/brand/v2/wordmark.css), as
 the `sw-wordmark` classes the `<h1>` carries: colour and size are inherited, so
 any property can drop the mark into a link or a heading at whatever size and
 colour surrounds it, and `sw-wordmark--brand` asks for the coloured logo
@@ -137,7 +137,7 @@ as display type. It marks up the wordmark with the same `sw-wordmark` classes
 the home page uses and overrides them from its own variables, so there is one
 set of class names across the site. Typefaces and colours are defined once, as
 `--sw-*` custom properties in the hosted brand theme
-`public/brand/v1/theme.css` (served at https://sprue.works/brand/v1/theme.css
+`public/brand/v2/theme.css` (served at https://sprue.works/brand/v2/theme.css
 with a long immutable cache via `public/_headers`); `public/style.css` only
 composes those variables. Other sprue.works properties link the same files;
 see `brand/README.md` for the consumer snippets, the variable list, the

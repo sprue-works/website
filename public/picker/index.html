@@ -9,12 +9,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link id="gf" rel="stylesheet" href="" />
-    <link rel="stylesheet" href="/brand/v1/theme.css" />
-    <link rel="stylesheet" href="/brand/v1/wordmark.css" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="stylesheet" href="/brand/v2/theme.css" />
+    <link rel="stylesheet" href="/brand/v2/wordmark.css" />
     <link rel="stylesheet" href="/style.css" />
     <style>
       /* Picker-only additions; the page above the strip is the real home.
-         These rules come after /brand/v1/wordmark.css and set the same
+         These rules come after /brand/v2/wordmark.css and set the same
          properties on the same classes, so they replace the shipped wordmark
          composition (fonts, scale, tracking, dot gap) and the home page's
          colours with the picker's --f-*, --w-*, --c-*, --xscale and gap
@@ -23,15 +24,16 @@
          Each span's letter-spacing is applied via a CSS variable; trailing
          tracking is measured out of widths, and given back as a margin the way
          wordmark.css does, so the preview occupies the width the shipped mark
-         would. */
+         would. The stretch mode's X transform rides on the same span, and its
+         centring pad is added to that same margin. */
       .sw-wordmark__sprue { color: var(--c-sprue); font-family: var(--f-sprue); font-weight: var(--w-sprue); font-variation-settings: var(--fvs-sprue, normal); letter-spacing: var(--ls-sprue, 0em); }
       .sw-wordmark__dot   { font-family: var(--f-dot);   font-weight: var(--w-dot);   font-variation-settings: var(--fvs-dot, normal);   font-size: calc(1em * var(--dscale, 1)); color: var(--c-dot); margin-left: var(--dot-before, 0em); margin-right: var(--dot-after, 0em); letter-spacing: 0; }
-      .sw-wordmark__works { color: var(--c-works); font-family: var(--f-works); font-weight: var(--w-works); font-variation-settings: var(--fvs-works, normal); font-size: calc(1em * var(--xscale, 1)); letter-spacing: calc(var(--ls-works, 0em) + var(--pitch-ls, 0em) + var(--width-ls, 0em)); margin-right: calc(-1 * (var(--ls-works, 0em) + var(--pitch-ls, 0em) + var(--width-ls, 0em))); }
+      .sw-wordmark__works { color: var(--c-works); font-family: var(--f-works); font-weight: var(--w-works); font-variation-settings: var(--fvs-works, normal); font-size: calc(1em * var(--xscale, 1)); letter-spacing: calc(var(--ls-works, 0em) + var(--pitch-ls, 0em) + var(--width-ls, 0em)); display: inline-block; transform: scaleX(var(--xstretch, 1)); transform-origin: left center; margin-right: calc(-1 * (var(--ls-works, 0em) + var(--pitch-ls, 0em) + var(--width-ls, 0em)) + var(--stretch-pad, 0em)); }
       main { padding-bottom: calc(var(--panel-h, 24rem) + 2rem); align-content: center; } /* --panel-h is the measured height of #picker; align-content keeps the sample under the wordmark on tall viewports */
       /* Sample body copy (#8): judges the Body and Code roles as running text.
          Kept visually secondary to the wordmark: measure-limited and coloured
          from the same picker variables as the wordmark. Sizes, leading, spacing
-         and radius are the theme's own tokens (/brand/v1/theme.css), so this
+         and radius are the theme's own tokens (/brand/v2/theme.css), so this
          previews how body copy set in the theme would look; only the faces
          come from the picker. */
       #sample { max-width: 34rem; margin: var(--sw-space-7, 3rem) auto 0; padding: 0 var(--sw-space-4, 1rem); color: var(--c-sprue); font-family: var(--f-body); font-weight: var(--w-body); font-variation-settings: var(--fvs-body, normal); font-size: var(--sw-text-md, 1rem); line-height: var(--sw-leading-normal, 1.5); }
@@ -48,7 +50,7 @@
       #picker {
         /* The panel is always dark, whatever the OS scheme or the chosen
            background, so pin its own fg/accent/muted rather than inheriting
-           the light-scheme values from /brand/v1/theme.css. */
+           the light-scheme values from /brand/v2/theme.css. */
         --sw-fg: var(--sw-floral-white, #fff7ed);
         --sw-accent: var(--sw-pumpkin-spice, #f97316);
         --sw-muted: #9d938d;
@@ -125,6 +127,8 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
         <label>Colour <select name="c_w" data-palette></select><output></output></label>
         <label>Match x-height <input type="checkbox" name="xh" /><output name="oxh"></output></label>
         <label>Match width <input type="checkbox" name="wd" /><output name="owd"></output></label>
+        <label id="wdthrow" hidden>Width axis <input type="range" name="wdth" step="0.5" /><output name="owdth"></output></label>
+        <label id="wdbyrow" hidden>Match width by <select name="wd_by"><option value="ls">letter-spacing</option><option value="pitch">pitch (mono)</option><option value="stretch">pitch, stretched to x-height</option><option value="axis">width axis (drawn)</option></select><output name="owdby"></output></label>
         <label id="pitchrow" hidden>Match pitch (mono) <input type="checkbox" name="pitch" /><output name="opitch"></output></label>
       </fieldset>
       <fieldset>
@@ -138,6 +142,7 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
       <fieldset>
         <legend>Code</legend>
         <label>Follows <select name="lock_c"><option value="sprue">sprue</option><option value="works">works</option><option value="dot">dot</option><option value="body">body</option><option value="none">nothing (own settings)</option></select><output></output></label>
+        <label>Own weight <input type="checkbox" name="lock_cw" /><output></output></label>
         <label>Family <select name="f_c"></select><output></output></label>
         <label>Weight <input type="range" name="w_c" step="100" /><output name="ow_c"></output></label>
       </fieldset>
@@ -152,7 +157,11 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
     </form>
 
     <script>
-      // family -> [googleFontsName, minWeight, maxWeight, generic, fixedWeights?, axisSpec?]
+      // family -> [source, minWeight, maxWeight, generic, fixedWeights?, axisSpec?, wdth [min,max,default]?]
+      // source is the Google Fonts family name, "@<slug>" for a Fontsource
+      // package served from jsDelivr (faces Google Fonts doesn't carry), or a
+      // path starting with "/" for faces served from this origin, where each
+      // weight is "<path>-<weight>.woff2".
       const FAMILIES = {
         "Nunito":              ["Nunito", 200, 1000, "sans-serif"],
         "Quicksand":           ["Quicksand", 300, 700, "sans-serif"],
@@ -176,8 +185,28 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
         "Spline Sans Mono":    ["Spline+Sans+Mono", 300, 700, "monospace"],
         "Atkinson Hyperlegible Mono": ["Atkinson+Hyperlegible+Mono", 200, 800, "monospace"],
         "Sometype Mono":       ["Sometype+Mono", 400, 700, "monospace"],
+        // Iosevka (OFL, github.com/be5invis/Iosevka): a stroke-built mono whose
+        // widths are drawn, not scaled. The official current release is on
+        // Fontsource in the normal width only, so the two self-hosted entries
+        // below carry the drawn Extended cut (0.576em per character against
+        // 0.500em, at the same x-height) plus its own normal width for an
+        // apples-to-apples comparison. See picker/fonts/iosevka-4.5/README.md
+        // for provenance, the subsetting, and how to swap in our own build.
+        // Martian Mono (OFL, evilmartians/mono) carries a real drawn width axis: at every
+        // wdth its x-height holds at 0.600em while the advance runs 0.600em to 0.750em, so
+        // width can be matched by choosing a width rather than by tracking or a transform.
+        "Martian Mono":        ["Martian+Mono", 100, 800, "monospace", null, "wdth,wght@75..112.5,100..800", [75, 112.5, 100]],
+        "Iosevka":             ["@iosevka", 100, 900, "monospace"],
+        // Our own build (34.8.1, ligatures, x-height 520). The two 4.5 entries are the
+        // third-party build it replaces, kept for comparison; see each directory's README.
+        // Not plain "Iosevka Sprue": theme.css, loaded here too, gives that name to the
+        // Extended cut, and a second set of rules under it would shadow the shipped face.
+        "Iosevka Sprue Normal":   ["/picker/fonts/iosevka-sprue-34.8.1-run10/normal", 200, 500, "monospace", [200, 300, 500]],
+        "Iosevka Sprue Extended": ["/picker/fonts/iosevka-sprue-34.8.1-run10/extended", 200, 500, "monospace", [200, 300, 500]],
+        "Iosevka 4.5":          ["/picker/fonts/iosevka-4.5/normal", 100, 900, "monospace"],
+        "Iosevka 4.5 Extended": ["/picker/fonts/iosevka-4.5/extended", 100, 900, "monospace"],
         "Recursive":           ["Recursive", 300, 1000, "sans-serif", null, "wght,CASL,MONO@300..1000,0..1,0..1"],
-        // The theme's body face (--sw-font-body): the platform UI stack, nothing to load.
+        // The platform UI stack, nothing to load (the theme's body face before Quicksand).
         // Offered for the Body and Code roles only; the wordmark roles are measured on canvas
         // and need a real webfont.
         "System UI":           [null, 100, 900, "sans-serif"],
@@ -190,26 +219,53 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
       const own = (o, k) => Object.hasOwn(o, k);
       const col = (k, d) => own(PALETTE, q.get(k)) ? q.get(k) : d;
 
+      // Pinned, not @5: a later 5.x could swap the files and with them every width
+      // this tool measures, for picker URLs already shared.
+      const FONTSOURCE_VER = "5.3.0";
+      const fontsource = (src) => src && src.startsWith("@");
+      const selfHosted = (src) => src && src.startsWith("/");
+      const weights = (lo, hi, fixed) => fixed || Array.from({ length: (hi - lo) / 100 + 1 }, (_, i) => lo + i * 100);
       document.getElementById("gf").href = "https://fonts.googleapis.com/css2?" +
-        Object.values(FAMILIES).filter(([gf]) => gf).map(([gf, lo, hi, , fixed, axes]) =>
+        Object.values(FAMILIES).filter(([gf]) => gf && !fontsource(gf) && !selfHosted(gf)).map(([gf, lo, hi, , fixed, axes]) =>
           "family=" + gf + ":" + (axes || ("wght@" + (fixed ? fixed.join(";") : lo + ".." + hi)))).join("&") + "&display=swap";
+      // Fontsource publishes one stylesheet per weight; each declares the family under its own
+      // name. Injected the first time a role actually selects the family, so a visit that never
+      // picks one pays nothing, and re-measured once the faces arrive.
+      const fsLoaded = new Set();
+      const ensureFontsource = (fam) => {
+        const [src, lo, hi, , fixed] = FAMILIES[fam];
+        if (!fontsource(src) || fsLoaded.has(src)) return;
+        fsLoaded.add(src);
+        for (const w of weights(lo, hi, fixed)) {
+          const l = document.createElement("link"); l.rel = "stylesheet"; l.onload = () => later();
+          l.href = `https://cdn.jsdelivr.net/npm/@fontsource/${src.slice(1)}@${FONTSOURCE_VER}/${w}.css`; document.head.appendChild(l);
+        }
+      };
+      // Faces from this origin: one @font-face per weight, named after the picker's
+      // own key. A browser fetches a file only once a rule actually selects it.
+      const faces = Object.entries(FAMILIES).filter(([, [src]]) => selfHosted(src)).flatMap(([name, [src, lo, hi, , fixed]]) =>
+        weights(lo, hi, fixed).map((w) => `@font-face{font-family:"${name}";font-weight:${w};font-style:normal;font-display:swap;src:url("${src}-${w}.woff2") format("woff2")}`)).join("");
+      if (faces) document.head.appendChild(Object.assign(document.createElement("style"), { textContent: faces }));
 
       const form = document.getElementById("picker");
       const root = document.documentElement.style;
       const q = new URLSearchParams(location.search);
-      const parse = (v, dFam, dW) => { const [f, w] = (v || "").split(":"); return [own(FAMILIES, f) ? f : dFam, +w || dW]; };
+      // Links made before the rename meant the Normal cut by "Iosevka Sprue".
+      const RENAMED = { "Iosevka Sprue": "Iosevka Sprue Normal" };
+      const parse = (v, dFam, dW) => { let [f, w] = (v || "").split(":"); f = RENAMED[f] || f; return [own(FAMILIES, f) ? f : dFam, +w || dW]; };
       const num = (k, d) => (q.has(k) ? +q.get(k) : d);
 
       // ---- state (all of it round-trips through the URL) ----
       // Defaults are the production combination from the wordmark tokens in
-      // /brand/v1/theme.css (Quicksand 700 / Nunito 300 / IBM Plex Mono 300, x-height and
-      // width matched, dot pulled 0.035em towards "works"), in the colours of
-      // whichever scheme the OS prefers. Keep them in sync with those tokens.
+      // /brand/v2/theme.css (Quicksand 700 / Nunito 300 / Iosevka Sprue Extended 200,
+      // x-height and width matched, dot pulled 0.035em towards "works"), in the colours
+      // of whichever scheme the OS prefers. Keep them in sync with those tokens: a bare
+      // /picker is meant to open on exactly what the site ships.
       const dark = matchMedia("(prefers-color-scheme: dark)").matches;
       const S = {};
       const webfont = (fam, d) => (FAMILIES[fam][0] ? fam : d);
       [S.fS, S.wS] = parse(q.get("sprue"), "Quicksand", 700); S.fS = webfont(S.fS, "Quicksand");
-      [S.fW, S.wW] = parse(q.get("works"), "IBM Plex Mono", 300); S.fW = webfont(S.fW, "IBM Plex Mono");
+      [S.fW, S.wW] = parse(q.get("works"), "Iosevka Sprue Extended", 200); S.fW = webfont(S.fW, "Iosevka Sprue Extended");
       S.lockW = S.fW === S.fS && S.wW === S.wS;
       S.lockD = ["sprue", "works", "none"].includes(q.get("dotlock")) ? q.get("dotlock") : "none";
       [S.fD, S.wD] = parse(q.get("dotfont"), "Nunito", 300); S.fD = webfont(S.fD, "Nunito");
@@ -220,33 +276,69 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
       S.mono = num("mono", 1); S.casl = num("casl", 1);
       // Body and Code roles (#8): the sample block follows these; each can
       // track a wordmark role or carry its own face. Defaults are production:
-      // --sw-font-body is the platform UI stack, --sw-font-mono is the works face.
+      // --sw-font-body is Quicksand 600 with headings at 700, and --sw-font-mono is
+      // the works face set at --sw-weight-code.
       S.lockB = ["sprue", "works", "dot", "none"].includes(q.get("bodylock")) ? q.get("bodylock") : "none";
-      [S.fB, S.wB] = parse(q.get("body"), "System UI", 400);
+      [S.fB, S.wB] = parse(q.get("body"), "Quicksand", 600);
       S.wH = Number.isFinite(num("heading", 700)) ? num("heading", 700) : 700;
       S.lockC = ["sprue", "works", "dot", "body", "none"].includes(q.get("codelock")) ? q.get("codelock") : "works";
-      [S.fC, S.wC] = parse(q.get("code"), "IBM Plex Mono", 300);
+      [S.fC, S.wC] = parse(q.get("code"), "Iosevka Sprue Extended", 500);
+      // Following a role is about the family; the weight can still be the code's
+      // own, so one face can set the wordmark and the code at two weights. codew
+      // carries that weight, and its presence is what says it is not inherited.
+      // Production sets code on the works family at its own weight, so a bare /picker
+      // does too. A URL that named a lock without a weight predates codew and meant the
+      // weight was inherited, so leave that reading alone.
+      S.ownWC = S.lockC !== "none" && (q.has("codew") || !q.has("codelock"));
+      if (S.ownWC && Number.isFinite(num("codew", NaN))) S.wC = num("codew", NaN);
       S.sample = q.get("sample") !== "0";
       S.xh = q.get("xh") !== "0"; S.wd = q.has("width") ? q.get("width") === "1" : true; S.pitch = q.get("pitch") !== "0";
-      let xscale = 1, dscale = 1, pitchLs = 0, widthLs = 0, measureTimer;
+      // How Match width fits "works": tracking, or (mono only) its pitch, or pitch in X
+      // with x-height in Y, or the face's own width axis.
+      S.wdBy = ["pitch", "stretch", "axis"].includes(q.get("widthby")) ? q.get("widthby") : "ls";
+      S.wdthW = num("wdthw", NaN); // the works face's width axis; NaN until a face with one is picked
+      let xscale = 1, dscale = 1, xstretch = 1, pitchLs = 0, widthLs = 0, axisMaxed = false, measureTimer;
 
       for (const sel of [form.f_s, form.f_w, form.f_d, form.f_b, form.f_c]) for (const [name, [gf]] of Object.entries(FAMILIES)) if (gf || sel === form.f_b || sel === form.f_c) sel.add(new Option(name, name));
       for (const sel of form.querySelectorAll("select[data-palette]")) for (const [k, [name, hex]] of Object.entries(PALETTE)) { const o = new Option(`${name} ${hex}`, k); o.style.background = hex; o.style.color = k === "floral-white" || k === "royal-gold" || k === "muted-teal" ? "#251818" : "#fff7ed"; sel.add(o); }
       const snap = (fam, w) => { const [, lo, hi, , fixed] = FAMILIES[fam]; if (fixed) return fixed.reduce((a, b) => Math.abs(b - w) < Math.abs(a - w) ? b : a); return Math.min(hi, Math.max(lo, Math.round(w / 100) * 100)); };
       const stack = (fam) => !FAMILIES[fam][0] ? SYSTEM_UI : FAMILIES[fam][3] === "monospace" ? `"${fam}", ui-monospace, SFMono-Regular, Menlo, monospace` : `"${fam}", system-ui, -apple-system, "Segoe UI", ${FAMILIES[fam][3]}`;
-      const fvs = (fam) => fam === "Recursive" ? `"MONO" ${S.mono}, "CASL" ${S.casl}` : "normal";
+      const wdthAxis = (fam) => FAMILIES[fam][6];
+      const fvs = (fam, wdth) => {
+        const parts = [];
+        if (fam === "Recursive") parts.push(`"MONO" ${S.mono}`, `"CASL" ${S.casl}`);
+        if (wdthAxis(fam) && wdth != null) parts.push(`"wdth" ${+(+wdth).toFixed(2)}`);
+        return parts.length ? parts.join(", ") : "normal";
+      };
       const isMono = (fam) => FAMILIES[fam][3] === "monospace" || (fam === "Recursive" && S.mono >= 0.5);
 
-      // ---- measurement (canvas, 100px, current variation axes) ----
+      // ---- measurement (canvas, current variation axes) ----
+      // Measured at 1000px, not at a display size: actualBoundingBoxAscent comes back
+      // quantised, so at 100px an x-height of 0.535em and one of 0.520em read as 55 and
+      // 52 and their ratio is 2.8% too large -- a real error, since that ratio becomes
+      // the works scale and the mark is set at whatever size the page wants. From about
+      // 400px up the ratio settles on the drawn one, and these are ratios, so the size
+      // they are taken at cancels.
+      const MEASURE_PX = 1000;
       const ctx = document.createElement("canvas").getContext("2d");
-      const metric = (fam, w, fn) => {
-        const face = `${w} 100px "${fam}"`;
+      const metric = (fam, w, fn, wdth) => {
+        const face = `${w} ${MEASURE_PX}px "${fam}"`;
         if (!document.fonts.check(face)) return null;
-        if ("fontVariationSettings" in ctx) ctx.fontVariationSettings = fvs(fam);
         ctx.font = face; return fn(ctx.measureText("x"));
       };
+      // Canvas has no way to set a variation axis, so a width-axis face is measured
+      // at its default width there. That is fine for x-height, which the one such face
+      // here (Martian Mono) holds constant across wdth, but not for the advance, which
+      // is what wdth changes: read that from an off-screen span carrying the settings.
+      const probe = Object.assign(document.createElement("span"), { textContent: "x".repeat(10) });
+      // Fixed and zero-height, so its 1000px line box adds no scrollable overflow to the page.
+      probe.style.cssText = `position:fixed;left:0;top:0;height:0;overflow:hidden;visibility:hidden;white-space:pre;font-size:${MEASURE_PX}px`;
+      document.body.appendChild(probe);
       const xHeight = (fam, w) => metric(fam, w, (m) => m.actualBoundingBoxAscent);
-      const advance = (fam, w) => metric(fam, w, (m) => m.width);
+      const advance = (fam, w, wdth) => metric(fam, w, () => {
+        Object.assign(probe.style, { fontFamily: `"${fam}"`, fontWeight: w, fontVariationSettings: fvs(fam, wdth) });
+        return probe.getBoundingClientRect().width / 10;
+      });
       const later = () => { clearTimeout(measureTimer); measureTimer = setTimeout(render, 150); };
       // Rendered width of a word span minus the trailing letter-spacing after its last glyph.
       const inkWidth = (sel) => { const el = document.querySelector(sel); const r = document.createRange(); r.selectNodeContents(el); return r.getBoundingClientRect().width - (parseFloat(getComputedStyle(el).letterSpacing) || 0); };
@@ -258,53 +350,135 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
         const role = { sprue: [S.fS, S.wS], works: [S.fW, S.wW], dot: [S.fD, S.wD] };
         if (S.lockB !== "none") [S.fB, S.wB] = role[S.lockB];
         S.wB = snap(S.fB, S.wB); S.wH = snap(S.fB, S.wH);
-        if (S.lockC !== "none") [S.fC, S.wC] = S.lockC === "body" ? [S.fB, S.wB] : role[S.lockC];
+        if (S.lockC !== "none") { const [fC, wC] = S.lockC === "body" ? [S.fB, S.wB] : role[S.lockC]; S.fC = fC; if (!S.ownWC) S.wC = wC; }
         S.wC = snap(S.fC, S.wC);
+        for (const fam of [S.fS, S.fW, S.fD, S.fB, S.fC]) ensureFontsource(fam);
+        const wAx = wdthAxis(S.fW); // [min, max, default]
+        S.wdthW = wAx ? (Number.isFinite(S.wdthW) ? Math.min(wAx[1], Math.max(wAx[0], S.wdthW)) : wAx[2]) : NaN;
 
         // fonts
         root.setProperty("--f-sprue", stack(S.fS)); root.setProperty("--w-sprue", S.wS); root.setProperty("--fvs-sprue", fvs(S.fS)); root.setProperty("--ls-sprue", S.lsS + "em");
-        root.setProperty("--f-works", stack(S.fW)); root.setProperty("--w-works", S.wW); root.setProperty("--fvs-works", fvs(S.fW)); root.setProperty("--ls-works", S.lsW + "em");
-        root.setProperty("--f-dot", stack(S.fD)); root.setProperty("--w-dot", S.wD); root.setProperty("--fvs-dot", fvs(S.fD));
-        root.setProperty("--f-body", stack(S.fB)); root.setProperty("--w-body", S.wB); root.setProperty("--fvs-body", fvs(S.fB)); root.setProperty("--w-heading", S.wH);
-        root.setProperty("--f-code", stack(S.fC)); root.setProperty("--w-code", S.wC); root.setProperty("--fvs-code", fvs(S.fC));
+        root.setProperty("--f-works", stack(S.fW)); root.setProperty("--w-works", S.wW); root.setProperty("--fvs-works", fvs(S.fW, S.wdthW)); root.setProperty("--ls-works", S.lsW + "em");
+        root.setProperty("--f-dot", stack(S.fD)); root.setProperty("--w-dot", S.wD);
+        root.setProperty("--f-body", stack(S.fB)); root.setProperty("--w-body", S.wB);  root.setProperty("--w-heading", S.wH);
+        root.setProperty("--f-code", stack(S.fC)); root.setProperty("--w-code", S.wC); 
         document.body.classList.toggle("hide-sample", !S.sample);
         root.setProperty("--c-sprue", PALETTE[S.cS][1]); root.setProperty("--c-dot", PALETTE[S.cD][1]); root.setProperty("--c-works", PALETTE[S.cW][1]); root.setProperty("--sw-bg", PALETTE[S.cBg][1]);
         root.setProperty("--dot-before", S.dotB + "em"); root.setProperty("--dot-after", S.dotA + "em");
 
-        // x-height: scale works so its lowercase x matches sprue's; the dot follows whichever side it locks to
+        // width by pitch: a mono "works" is fitted to "sprue" by choosing its pitch (size) rather than by
+        // tracking, so its five advances stay even. It owns the works scale, so it overrides x-height.
         const differs = S.fS !== S.fW || S.wS !== S.wW || S.fS === "Recursive";
-        if (S.xh && differs) { const a = xHeight(S.fS, S.wS), b = xHeight(S.fW, S.wW); if (a && b) xscale = a / b; else later(); } else xscale = 1;
+        const matchW = S.wd && (differs || S.lsS !== S.lsW);
+        const pitchMode = S.wd && isMono(S.fW) && ["pitch", "stretch"].includes(S.wdBy);
+        // Width by the face's own drawn width axis: the size still comes from x-height, and the
+        // width is solved by choosing a width, so pitch stays even and the strokes stay true.
+        const axisMode = S.wd && !!wAx && S.wdBy === "axis";
+        // Y from x-height, X from pitch: a deliberate distortion, read the % before keeping it.
+        // Not gated on differs: identical faces have an x-height ratio of 1, and the stretch still has work to do.
+        const stretchMode = pitchMode && S.wdBy === "stretch"; // x-height is what it stretches to, so it is always on here
+        document.getElementById("wdbyrow").hidden = !(S.wd && (isMono(S.fW) || wAx));
+        document.getElementById("wdthrow").hidden = !wAx;
+        for (const o of form.wd_by.options) o.disabled = o.value === "axis" ? !wAx : o.value === "ls" ? false : !isMono(S.fW);
+
+        // x-height: scale works so its lowercase x matches sprue's; the dot follows whichever side it locks to
+        xstretch = 1; axisMaxed = false;
+        if (pitchMode) {
+          if (stretchMode) { const a = xHeight(S.fS, S.wS), b = xHeight(S.fW, S.wW); if (a && b) xscale = a / b; else later(); }
+          root.setProperty("--pitch-ls", "0em"); root.setProperty("--width-ls", "0em"); root.setProperty("--xstretch", "1"); root.setProperty("--stretch-pad", "0em"); root.setProperty("--xscale", xscale.toFixed(4));
+          const w = inkWidth(".sw-wordmark__works"), t = inkWidth(".sw-wordmark__sprue");
+          if (!(w > 0 && t > 0)) { xscale = 1; later(); }
+          else if (stretchMode) {
+            // Layout keeps the unstretched width, so pad it to keep the wordmark centred. In em
+            // against the works span, because the wordmark's own size follows the viewport and
+            // nothing re-measures on resize; a px pad would freeze at one viewport width.
+            xstretch = t / w;
+            const px = parseFloat(getComputedStyle(document.querySelector(".sw-wordmark__works")).fontSize);
+            root.setProperty("--stretch-pad", px ? ((xstretch - 1) * w / px).toFixed(4) + "em" : "0em");
+          }
+          else xscale *= t / w;
+        } else if (S.xh && differs) { const a = xHeight(S.fS, S.wS), b = xHeight(S.fW, S.wW); if (a && b) xscale = a / b; else later(); } else xscale = 1;
         dscale = S.lockD === "works" ? xscale : 1;
-        root.setProperty("--xscale", xscale.toFixed(4)); root.setProperty("--dscale", dscale.toFixed(4));
+        root.setProperty("--xscale", xscale.toFixed(4)); root.setProperty("--dscale", dscale.toFixed(4)); root.setProperty("--xstretch", xstretch.toFixed(4));
+        if (xstretch === 1) root.setProperty("--stretch-pad", "0em");
 
         // pitch: two monos -> tracking on works so per-character advance matches sprue's (words only)
         const bothMono = isMono(S.fS) && isMono(S.fW) && (S.fS !== S.fW || S.wS !== S.wW || S.lsS !== S.lsW);
         document.getElementById("pitchrow").hidden = !bothMono;
-        if (S.pitch && bothMono && !S.wd) { const a = advance(S.fS, S.wS), b = advance(S.fW, S.wW); if (a && b) pitchLs = (a / 100 + S.lsS) / xscale - b / 100 - S.lsW; else later(); } else pitchLs = 0;
+        if (S.pitch && bothMono && !S.wd) { const a = advance(S.fS, S.wS), b = advance(S.fW, S.wW, S.wdthW); if (a && b) pitchLs = (a / MEASURE_PX + S.lsS) / xscale - b / MEASURE_PX - S.lsW; else later(); } else pitchLs = 0;
         root.setProperty("--pitch-ls", pitchLs.toFixed(4) + "em");
 
+        // width by axis: choose the works face's width so its ink width equals sprue's. Ink width
+        // is monotonic in wdth, so bisect it; each step writes the axis and re-measures, which is a
+        // synchronous layout, so this converges inside one render rather than over several.
+        if (axisMode) {
+          root.setProperty("--width-ls", "0em"); widthLs = 0;
+          let lo = wAx[0], hi = wAx[1], wd = S.wdthW, target = inkWidth(".sw-wordmark__sprue"), delta = 0;
+          for (let i = 0; i < 20; i++) {
+            root.setProperty("--fvs-works", fvs(S.fW, wd));
+            delta = target - inkWidth(".sw-wordmark__works");
+            if (Math.abs(delta) < 0.05) break;
+            if (delta > 0) lo = wd; else hi = wd;
+            const next = (lo + hi) / 2;
+            if (Math.abs(next - wd) < 1e-4) break; // bracket collapsed: as close as this axis gets
+            wd = next;
+          }
+          // The loop can end on a width it chose but never measured (steps exhausted), so apply
+          // and measure the final value once more: the tracking below must belong to it.
+          root.setProperty("--fvs-works", fvs(S.fW, wd));
+          delta = target - inkWidth(".sw-wordmark__works");
+          S.wdthW = wd;
+          // Any width left over is closed with tracking, so "Match width" stays true to its name.
+          // Two different reasons to have some: the axis is pinned at an end, which happens when
+          // x-height matching has fixed a size no cut can span, or layout simply quantises finer
+          // than the axis can steer. Only the first is worth calling out.
+          if (Math.abs(delta) > 0.05) {
+            const worksPx = parseFloat(getComputedStyle(document.querySelector(".sw-wordmark__works")).fontSize);
+            if (worksPx) widthLs = delta / (4 * worksPx); // 4 inter-letter gaps in "works"
+            if (Math.abs(widthLs) < 0.0005) widthLs = 0;
+            root.setProperty("--width-ls", widthLs.toFixed(4) + "em");
+            axisMaxed = wd <= wAx[0] + 1e-3 || wd >= wAx[1] - 1e-3;
+          }
+        }
         // width: tracking on works so the ink width of "works" equals that of "sprue" (dot excluded)
-        if (S.wd && (differs || S.lsS !== S.lsW)) {
+        else if (matchW && !pitchMode) {
           root.setProperty("--width-ls", widthLs.toFixed(4) + "em");
           const worksPx = parseFloat(getComputedStyle(document.querySelector(".sw-wordmark__works")).fontSize);
           const delta = inkWidth(".sw-wordmark__sprue") - inkWidth(".sw-wordmark__works");
           if (Math.abs(delta) > 0.05 && worksPx) { widthLs += delta / (4 * worksPx); root.setProperty("--width-ls", widthLs.toFixed(4) + "em"); } // 4 inter-letter gaps in "works"
         } else { widthLs = 0; root.setProperty("--width-ls", "0em"); }
 
+        // A role set in the works family is set at the works width too: the dot, body or code
+        // that follows "works" should not render its face at a different width from it.
+        const fvsRole = (fam) => fvs(fam, fam === S.fW ? S.wdthW : undefined);
+        root.setProperty("--fvs-dot", fvsRole(S.fD)); root.setProperty("--fvs-body", fvsRole(S.fB)); root.setProperty("--fvs-code", fvsRole(S.fC));
+
         // controls
         const setRange = (el, fam, w) => { el.min = FAMILIES[fam][1]; el.max = FAMILIES[fam][2]; el.value = w; };
         form.f_s.value = S.fS; setRange(form.w_s, S.fS, S.wS); form.ow_s.value = S.wS; form.ls_s.value = S.lsS; form.ols_s.value = S.lsS.toFixed(3) + "em";
-        form.lock_w.checked = S.lockW; form.f_w.value = S.fW; form.f_w.disabled = S.lockW; setRange(form.w_w, S.fW, S.wW); form.w_w.disabled = S.lockW; form.ow_w.value = S.wW; const trackingDriven = S.wd || (S.pitch && bothMono);
+        form.lock_w.checked = S.lockW; form.f_w.value = S.fW; form.f_w.disabled = S.lockW; setRange(form.w_w, S.fW, S.wW); form.w_w.disabled = S.lockW; form.ow_w.value = S.wW;
+        // Tracking is the picker's to set only in the letter-spacing mode. The pitch and
+        // axis modes solve size or width instead, so there the user's tracking stays
+        // theirs and is simply part of what gets measured.
+        const trackingDriven = !pitchMode && !axisMode && (S.wd || (S.pitch && bothMono));
         form.ls_w.value = S.lsW; form.ls_w.disabled = S.lockW || trackingDriven;
-        form.ols_w.value = (trackingDriven ? "= " : "") + (S.lsW + pitchLs + widthLs).toFixed(3) + "em";
+        // "=" marks a number the picker chose. In axis mode that is only the remainder
+        // it had to add once the axis hit an end.
+        form.ols_w.value = (trackingDriven || (axisMode && widthLs !== 0) ? "= " : "") + (S.lsW + pitchLs + widthLs).toFixed(3) + "em";
         form.lock_d.value = S.lockD; form.f_d.value = S.fD; form.f_d.disabled = S.lockD !== "none"; setRange(form.w_d, S.fD, S.wD); form.w_d.disabled = S.lockD !== "none"; form.ow_d.value = S.wD;
         form.lock_b.value = S.lockB; form.f_b.value = S.fB; form.f_b.disabled = S.lockB !== "none"; setRange(form.w_b, S.fB, S.wB); form.w_b.disabled = S.lockB !== "none"; form.ow_b.value = S.wB;
         setRange(form.w_h, S.fB, S.wH); form.ow_h.value = S.wH; form.sample.checked = S.sample;
-        form.lock_c.value = S.lockC; form.f_c.value = S.fC; form.f_c.disabled = S.lockC !== "none"; setRange(form.w_c, S.fC, S.wC); form.w_c.disabled = S.lockC !== "none"; form.ow_c.value = S.wC;
+        form.lock_c.value = S.lockC; form.f_c.value = S.fC; form.f_c.disabled = S.lockC !== "none";
+        form.lock_cw.checked = S.ownWC; form.lock_cw.disabled = S.lockC === "none"; // nothing to inherit a weight from
+        setRange(form.w_c, S.fC, S.wC); form.w_c.disabled = S.lockC !== "none" && !S.ownWC; form.ow_c.value = S.wC;
         form.c_s.value = S.cS; form.c_d.value = S.cD; form.c_w.value = S.cW; form.c_bg.value = S.cBg;
         form.dotb.value = S.dotB; form.dota.value = S.dotA; form.odotb.value = S.dotB.toFixed(3) + "em"; form.odota.value = S.dotA.toFixed(3) + "em";
-        form.xh.checked = S.xh; form.oxh.value = xscale === 1 ? "" : "×" + xscale.toFixed(3);
-        form.wd.checked = S.wd; form.owd.value = widthLs === 0 ? "" : (widthLs > 0 ? "+" : "") + widthLs.toFixed(3) + "em";
+        form.xh.checked = S.xh || stretchMode; form.xh.disabled = pitchMode;
+        form.oxh.value = pitchMode && !stretchMode ? "(pitch sets size)" : S.xh && xscale !== 1 ? "×" + xscale.toFixed(3) : "";
+        form.wd.checked = S.wd; form.owd.value = pitchMode && !stretchMode ? "×" + xscale.toFixed(3) : stretchMode ? "" : widthLs === 0 ? "" : (widthLs > 0 ? "+" : "") + widthLs.toFixed(3) + "em";
+        if (wAx) { form.wdth.min = wAx[0]; form.wdth.max = wAx[1]; form.wdth.value = S.wdthW; form.wdth.disabled = axisMode; form.owdth.value = S.wdthW.toFixed(1) + (axisMode ? (axisMaxed ? (S.wdthW >= wAx[1] ? " (widest, tracking helps)" : " (narrowest, tracking helps)") : " (matched)") : S.wdthW === wAx[2] ? " (default)" : ""); }
+        const stretchPct = (xstretch - 1) * 100;
+        form.wd_by.value = S.wdBy; form.owdby.value = xstretch === 1 ? "" : `X ${stretchPct > 0 ? "+" : ""}${stretchPct.toFixed(1)}%` + (Math.abs(stretchPct) > 10 ? " (heavy)" : "");
         form.pitch.checked = S.pitch; form.pitch.disabled = S.wd; form.opitch.value = pitchLs === 0 ? "" : (pitchLs > 0 ? "+" : "") + pitchLs.toFixed(3) + "em";
         const rec = [S.fS, S.fW, S.fD, S.fB, S.fC].includes("Recursive");
         document.getElementById("recrow").hidden = document.getElementById("caslrow").hidden = !rec;
@@ -314,11 +488,11 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
         const p = new URLSearchParams({ sprue: `${S.fS}:${S.wS}`, works: `${S.fW}:${S.wW}`, lss: S.lsS.toFixed(3), lsw: S.lsW.toFixed(3), cs: S.cS, cd: S.cD, cw: S.cW, bg: S.cBg });
         p.set("dotlock", S.lockD); if (S.lockD === "none") p.set("dotfont", `${S.fD}:${S.wD}`);
         p.set("bodylock", S.lockB); if (S.lockB === "none") p.set("body", `${S.fB}:${S.wB}`); p.set("heading", S.wH);
-        p.set("codelock", S.lockC); if (S.lockC === "none") p.set("code", `${S.fC}:${S.wC}`);
+        p.set("codelock", S.lockC); if (S.lockC === "none") p.set("code", `${S.fC}:${S.wC}`); else if (S.ownWC) p.set("codew", S.wC);
         if (!S.sample) p.set("sample", "0");
         if (S.dotB) p.set("dotb", S.dotB.toFixed(3)); if (S.dotA) p.set("dota", S.dotA.toFixed(3));
         if (rec) { p.set("mono", S.mono.toFixed(2)); p.set("casl", S.casl.toFixed(2)); }
-        if (!S.xh) p.set("xh", "0"); p.set("width", S.wd ? "1" : "0"); if (!S.pitch) p.set("pitch", "0");
+        if (!S.xh) p.set("xh", "0"); p.set("width", S.wd ? "1" : "0"); if (S.wdBy !== "ls") p.set("widthby", S.wdBy); if (Number.isFinite(S.wdthW) && (axisMode || S.wdthW !== wAx[2])) p.set("wdthw", S.wdthW.toFixed(1)); if (!S.pitch) p.set("pitch", "0");
         history.replaceState(null, "", "?" + p);
         document.getElementById("url").textContent = location.href;
       }
@@ -328,11 +502,11 @@ if (S.xh &amp;&amp; differs) xscale = a / b;  // 0.9375</pre>
       bind("lock_w", (e) => { S.lockW = e.checked; }); bind("f_w", (e) => { S.fW = e.value; }); bind("w_w", (e) => { S.wW = +e.value; }); bind("ls_w", (e) => { S.lsW = +e.value; });
       bind("lock_d", (e) => { S.lockD = e.value; }); bind("f_d", (e) => { S.fD = e.value; }); bind("w_d", (e) => { S.wD = +e.value; });
       bind("lock_b", (e) => { S.lockB = e.value; }); bind("f_b", (e) => { S.fB = e.value; }); bind("w_b", (e) => { S.wB = +e.value; }); bind("w_h", (e) => { S.wH = +e.value; }); bind("sample", (e) => { S.sample = e.checked; });
-      bind("lock_c", (e) => { S.lockC = e.value; }); bind("f_c", (e) => { S.fC = e.value; }); bind("w_c", (e) => { S.wC = +e.value; });
+      bind("lock_c", (e) => { S.lockC = e.value; }); bind("lock_cw", (e) => { S.ownWC = e.checked; }); bind("f_c", (e) => { S.fC = e.value; }); bind("w_c", (e) => { S.wC = +e.value; });
       bind("c_s", (e) => { S.cS = e.value; }); bind("c_d", (e) => { S.cD = e.value; }); bind("c_w", (e) => { S.cW = e.value; }); bind("c_bg", (e) => { S.cBg = e.value; });
       bind("dotb", (e) => { S.dotB = +e.value; }); bind("dota", (e) => { S.dotA = +e.value; });
       bind("mono", (e) => { S.mono = +e.value; }); bind("casl", (e) => { S.casl = +e.value; });
-      bind("xh", (e) => { S.xh = e.checked; }); bind("wd", (e) => { S.wd = e.checked; widthLs = 0; }); bind("pitch", (e) => { S.pitch = e.checked; });
+      bind("xh", (e) => { S.xh = e.checked; }); bind("wd", (e) => { S.wd = e.checked; widthLs = 0; }); bind("wd_by", (e) => { S.wdBy = e.value; widthLs = 0; xscale = 1; }); bind("wdth", (e) => { S.wdthW = +e.value; }); bind("pitch", (e) => { S.pitch = e.checked; });
       const toggle = () => document.body.classList.toggle("hide-picker");
       document.getElementById("hide").onclick = toggle;
       addEventListener("keydown", (e) => { if (e.key === "h" && document.activeElement.tagName !== "SELECT") toggle(); });
