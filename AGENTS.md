@@ -19,7 +19,8 @@ fallback off. Keep Claude-specific behavior in Claude-owned surfaces such as
 This repo uses the **`ticket-workflow`** plugin from the
 [`maguerrieri-toolbox`](https://github.com/maguerrieri/claude-toolbox)
 marketplace (`/make-ticket`, `/start-ticket`, `/finish-ticket`,
-`/spawn-tickets`, `/start-epic`, `/spawn-epic`): files an issue, takes it
+`/spawn-tickets`, `/start-epic`, `/spawn-epic`, each also available
+plugin-qualified as `/ticket-workflow:<name>`): files an issue, takes it
 through a reviewed PR, and lands it. The `Tracker:`/`Profile:` lines below
 configure it for this repo, so a plain "fix this" or "add that" ask here
 triggers it too: the skill files an issue, then starts it:
