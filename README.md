@@ -4,6 +4,10 @@ Source for https://sprue.works: a single static page, plain HTML and CSS, no
 build step. The site lives in `public/`, which also serves the hosted brand
 theme (`public/brand/`, documented in `brand/README.md`).
 
+Work is tracked in GitHub Issues and driven with the `ticket-workflow` Claude
+Code plugin; `AGENTS.md` has the tracker setup and the commit and PR
+conventions.
+
 ## Run locally
 
 Open `public/index.html` in a browser, or serve it the way production does:
