@@ -59,7 +59,17 @@ main {
 }
 
 /* ---- Footer ---- */
+/* The links sit in one centred row and wrap onto further centred rows on
+   narrow screens; the gap spaces them in both directions. The row gap is
+   at least 12px, twice the focus outline's reach below (2px + 4px offset),
+   so a focused link's outline clears the next row. text-align centres a
+   label that wraps inside its own link. */
 footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: max(0.75rem, 12px) 1.5rem;
   padding: 1.5rem 1rem 2rem;
   text-align: center;
   font-size: 0.9rem;
