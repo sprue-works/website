@@ -59,7 +59,13 @@ main {
 }
 
 /* ---- Footer ---- */
+/* The links sit in one centred row and wrap onto further centred rows on
+   narrow screens; the gap spaces them in both directions. */
 footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 1.5rem;
   padding: 1.5rem 1rem 2rem;
   text-align: center;
   font-size: 0.9rem;
