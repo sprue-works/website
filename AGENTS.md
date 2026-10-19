@@ -1,7 +1,7 @@
 # sprue.works website
 
-Source for https://sprue.works: a static site in `public/` (plain HTML and CSS,
-no build step) that also serves the hosted brand theme (`public/brand/`,
+Source for https://sprue.works: a single static page in `public/` (plain HTML
+and CSS, no build step) that also serves the hosted brand theme (`public/brand/`,
 documented in `brand/README.md`), deployed as a Cloudflare Worker with static
 assets, plus zone-level Cloudflare config in `terraform/`. `README.md` covers
 running it locally, deploys and branch previews, and the Terraform workflow.
@@ -44,7 +44,9 @@ sessions install them when the folder is trusted. List a plugin's
 dependencies next to it there: the settings-triggered install doesn't resolve
 them, so a plugin enabled without them loads nothing. Cloud sessions (Claude
 Code on the web) skip repo-declared plugins, so the `SessionStart` hook in the
-same file runs the toolbox's `.claude/hooks/session-start.sh`, which installs
-every enabled plugin from that marketplace when `CLAUDE_CODE_REMOTE` is `true`
-and does nothing locally. Headless runs (`claude -p`, the SDK) install
+same file fetches and runs the toolbox's `.claude/hooks/session-start.sh`,
+which installs every enabled plugin from that marketplace; the hook skips the
+fetch unless `CLAUDE_CODE_REMOTE` is `true`, so it does nothing locally.
+`/start-ticket` creates worktrees under `.claude/worktrees/`, which
+`.gitignore` excludes. Headless runs (`claude -p`, the SDK) install
 nothing from these settings.

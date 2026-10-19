@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "curl -fsSL https://raw.githubusercontent.com/maguerrieri/claude-toolbox/main/.claude/hooks/session-start.sh | bash"
+            "command": "[ \"$CLAUDE_CODE_REMOTE\" = true ] || exit 0; curl -fsSL --max-time 30 https://raw.githubusercontent.com/maguerrieri/claude-toolbox/main/.claude/hooks/session-start.sh | bash"
           }
         ]
       }
