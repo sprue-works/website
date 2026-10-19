@@ -47,6 +47,10 @@ Code on the web) skip repo-declared plugins, so the `SessionStart` hook in the
 same file fetches and runs the toolbox's `.claude/hooks/session-start.sh`,
 which installs every enabled plugin from that marketplace; the hook skips the
 fetch unless `CLAUDE_CODE_REMOTE` is `true`, so it does nothing locally.
-`/start-ticket` creates worktrees under `.claude/worktrees/`, which
-`.gitignore` excludes. Headless runs (`claude -p`, the SDK) install
+A cloud session with several repositories attached loads no repository's
+hooks, so there the plugins arrive only from outside the repo: enable the
+marketplace on your claude.ai account (Customize › Plugins › Add marketplace)
+so its plugins sync into every cloud session, or run the same install from the
+cloud environment's setup script. `/start-ticket` creates worktrees under
+`.claude/worktrees/`, which `.gitignore` excludes. Headless runs (`claude -p`, the SDK) install
 nothing from these settings.
