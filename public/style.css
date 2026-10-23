@@ -72,13 +72,13 @@ footer {
   justify-content: center;
   align-items: baseline;
   gap: var(--sw-space-2) var(--sw-space-5);
-  padding: 1.5rem 1rem 2rem;
+  padding: var(--sw-space-5) var(--sw-space-4) var(--sw-space-6);
   text-align: center;
-  font-size: 0.9rem;
+  font-size: var(--sw-text-sm);
 }
 
 footer a {
-  color: var(--sw-muted);
+  color: var(--sw-fg);
   text-decoration: underline;
   text-decoration-color: currentColor; /* fallback for browsers without color-mix() */
   text-decoration-color: color-mix(in srgb, var(--sw-muted) 50%, transparent);
@@ -88,8 +88,8 @@ footer a {
 
 footer a:hover,
 footer a:focus-visible {
-  color: var(--sw-fg);
   text-decoration-color: currentColor;
+  text-decoration-thickness: 2px;
 }
 
 footer a:focus-visible {
