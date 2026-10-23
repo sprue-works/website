@@ -58,8 +58,20 @@ main {
   height: auto;
 }
 
-/* ---- Footer ---- */
+/* ---- Footer ----
+   A centred row of links that wraps whole links onto new lines. Spacing is
+   gap only (no separators, no margins) so a wrapped line never leaves an
+   orphan. Keep the row gap at --sw-space-2 or more: the 2px focus outline sits
+   6px outside a link, and WCAG 2.2 SC 2.5.8 spacing depends on the gaps.
+   text-align stays even though justify-content centres the row: the picker's
+   body.hide-picker footer { display: block } outranks this rule, and
+   text-align is what keeps its single link centred then. */
 footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: var(--sw-space-2) var(--sw-space-5);
   padding: 1.5rem 1rem 2rem;
   text-align: center;
   font-size: 0.9rem;
