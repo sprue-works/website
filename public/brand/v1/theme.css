@@ -65,7 +65,7 @@
   --sw-radius-lg: 8px;
   --sw-radius-full: 9999px;
 
-  /* ---- Palette (coolors.co/palette/c2571b-f97316-134e4a-f9dc5c-fff7ed-7fc6a4-904114-251818) */
+  /* ---- Palette (coolors.co/palette/c2571b-f97316-134e4a-f9dc5c-fff7ed-7fc6a4-904114-251818-1f1d1c) */
   --sw-bronze-spice: #c2571b;
   --sw-pumpkin-spice: #f97316;
   --sw-pine-teal: #134e4a;
@@ -74,6 +74,9 @@
   --sw-muted-teal: #7fc6a4;
   --sw-rust-brown: #904114;
   --sw-coffee-bean: #251818;
+  /* A neutral near-black, for a dark background or text where Coffee Bean's
+     red cast shows (#26). Not used by the semantic colours below. */
+  --sw-eerie-black: #1f1d1c;
 
   /* Semantic colours, light scheme (default). */
   --sw-bg: var(--sw-floral-white);

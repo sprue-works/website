@@ -55,7 +55,14 @@ Semantic colours (switch automatically with `prefers-color-scheme`):
 Raw palette (scheme-independent): `--sw-bronze-spice` `#c2571b`,
 `--sw-pumpkin-spice` `#f97316`, `--sw-pine-teal` `#134e4a`, `--sw-royal-gold`
 `#f9dc5c`, `--sw-floral-white` `#fff7ed`, `--sw-muted-teal` `#7fc6a4`,
-`--sw-rust-brown` `#904114`, `--sw-coffee-bean` `#251818`.
+`--sw-rust-brown` `#904114`, `--sw-coffee-bean` `#251818`, `--sw-eerie-black`
+`#1f1d1c`.
+
+Eerie Black is a neutral near-black for a page that wants black or dark gray
+rather than Coffee Bean, whose red cast shows across a large area such as a
+dark background. No semantic colour uses it; a page maps its own `--sw-bg` or
+`--sw-fg` to it. Its contrast is within 2% of Coffee Bean's: 15.8:1 with
+Floral White, 6.0:1 with Pumpkin Spice.
 
 Type:
 
