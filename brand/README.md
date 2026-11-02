@@ -52,7 +52,7 @@ Semantic colours (switch automatically with `prefers-color-scheme`):
 | `--sw-accent` | Rust Brown | Pumpkin Spice |
 | `--sw-color-sprue` / `--sw-color-dot` / `--sw-color-works` | Coffee Bean / Pine Teal / Rust Brown | Floral White / Muted Teal / Pumpkin Spice |
 
-Raw palette (scheme-independent): `--sw-bronze-spice` `#c2571b`,
+Raw palette (scheme-independent): `--sw-bronze-spice` `#bd5205`,
 `--sw-pumpkin-spice` `#f97316`, `--sw-pine-teal` `#134e4a`, `--sw-royal-gold`
 `#f9dc5c`, `--sw-floral-white` `#fff7ed`, `--sw-muted-teal` `#7fc6a4`,
 `--sw-rust-brown` `#904114`, `--sw-coffee-bean` `#251818`, `--sw-eerie-black`
@@ -63,6 +63,11 @@ rather than Coffee Bean, whose red cast shows across a large area such as a
 dark background. No semantic colour uses it; a page maps its own `--sw-bg` or
 `--sw-fg` to it. Its contrast is within 2% of Coffee Bean's: 15.8:1 with
 Floral White, 6.0:1 with Pumpkin Spice.
+
+Bronze Spice is the dark orange that holds up as text on Floral White: 4.5:1,
+where Pumpkin Spice is 2.6:1, so it's the orange for links and controls in the
+light scheme. It was `#c2571b` (4.2:1) until #26 deepened it, a v1 value
+adjustment; repeat visitors see the old value until their cached theme expires.
 
 Type:
 

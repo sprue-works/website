@@ -65,8 +65,8 @@
   --sw-radius-lg: 8px;
   --sw-radius-full: 9999px;
 
-  /* ---- Palette (coolors.co/palette/c2571b-f97316-134e4a-f9dc5c-fff7ed-7fc6a4-904114-251818-1f1d1c) */
-  --sw-bronze-spice: #c2571b;
+  /* ---- Palette (coolors.co/palette/bd5205-f97316-134e4a-f9dc5c-fff7ed-7fc6a4-904114-251818-1f1d1c) */
+  --sw-bronze-spice: #bd5205; /* 4.5:1 on Floral White; #c2571b until #26 */
   --sw-pumpkin-spice: #f97316;
   --sw-pine-teal: #134e4a;
   --sw-royal-gold: #f9dc5c;
